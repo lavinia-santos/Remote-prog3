@@ -938,7 +938,28 @@ def calculate_vdw_gradient(file, atom_types):
     print(f"Gradient:", gradients)
     return gradients
 
-
+def gradient_full(file, atom_types, atom_coords, bonds, num_atoms):
+    """
+    This function calculates the full gradient of the molecule by summing all gradient contributions.
+    """
+    # Calculate bond stretching gradient
+    bond_stretching_gradient = calculate_bond_stretching_gradient(file, atom_types)
+    
+    # Calculate angle bending gradient
+    angle_bending_gradient = calculate_angle_bending_gradient(file, atom_types)
+    
+    # Calculate dihedral angle gradient
+    dihedral_angle_gradient = calculate_dihedral_angle_gradient(file, atom_coords, bonds, atom_types)
+    
+    # Calculate VDW gradient
+    vdw_gradient = calculate_vdw_gradient(file, atom_types)
+    
+    # Total gradient
+    total_gradient = {f"{atom_types[str(i)]}{i}": np.zeros(3) for i in range(1, num_atoms + 1)}
+    for atom in total_gradient:
+        total_gradient[atom] = bond_stretching_gradient[atom] + angle_bending_gradient[atom] + dihedral_angle_gradient[atom] + vdw_gradient[atom]
+    
+    return total_gradient
 
 
 
@@ -1026,5 +1047,11 @@ def debug(file_name):
     # Calculate VDW gradient
     print("\nCalculating VDW gradient...")
     vdw_gradient = calculate_vdw_gradient(file_name, atom_types)
+
+    # Calculate full gradient
+    print("\nCalculating full gradient...")
+    full_gradient = gradient_full(file_name, atom_types, atom_coords, bonds, num_atoms)
+    print("Full gradient:")
+    print(full_gradient)
     
 
