@@ -887,17 +887,22 @@ def calculate_vdw_gradient(file, atom_types):
         for atom2 in atom_coords:
             atom=int(atom)
             atom2=int(atom2)
+            # print("atom:", atom)
+            # print("atom2:", atom2)
             if atom != atom2:
                 pair = tuple(sorted([atom, atom2]))
+                # print("pair:", pair)
                 if pair not in unique_pairs:
+                    # print("pair:", pair)
+                    # print("and bonded:",bonded_atoms.get(atom, []))
                     if atom2 not in bonded_atoms.get(atom, []) and not any(atom2 in bonded_atoms.get(neighbor, []) for neighbor in bonded_atoms.get(atom, [])):
                         # print(bonded_atoms.get(atom))
-                        # print(pair)
+                        
                         unique_pairs.add(pair)
                         atom1 = str(atom)
                         atom2 = str(atom2)
                         bond_key = f"{atom_types[atom1]}{atom_types[atom2]}"
-                        print("bond_key:", bond_key)
+                        # print("bond_key:", bond_key)
                         
                         if bond_key == 'HH':
                             sigma = sigma_HH
@@ -911,25 +916,26 @@ def calculate_vdw_gradient(file, atom_types):
                         else:
                             continue
                     # print(atom_coords)
-                    x1 = atom_coords[str(atom1)][0]
-                    y1 = atom_coords[str(atom1)][1]
-                    z1 = atom_coords[str(atom1)][2]
-                    x2 = atom_coords[str(atom2)][0]
-                    y2 = atom_coords[str(atom2)][1]
-                    z2 = atom_coords[str(atom2)][2]
-                    Aij = 4 * epsilon * sigma**12
-                    Bij = 4 * epsilon * sigma**6
-                    r = atom_coords[atom1] - atom_coords[atom2]
-                    r_norm = np.linalg.norm(r)
-                    gradientx_atom1 = (x1 - x2) * (((-12 * Aij)/r_norm**14) + ((6 * Bij)/r_norm**8))
-                    gradienty_atom1 = (y1 - y2) * (((-12 * Aij)/r_norm**14) + ((6 * Bij)/r_norm**8))
-                    gradientz_atom1 = (z1 - z2) * (((-12 * Aij)/r_norm**14) + ((6 * Bij)/r_norm**8))
-                    gradientx_atom2 = (x2 - x1) * (((-12 * Aij)/r_norm**14) + ((6 * Bij)/r_norm**8))
-                    gradienty_atom2 = (y2 - y1) * (((-12 * Aij)/r_norm**14) + ((6 * Bij)/r_norm**8))
-                    gradientz_atom2 = (z2 - z1) * (((-12 * Aij)/r_norm**14) + ((6 * Bij)/r_norm**8))
-                    gradients[f"{atom_types[atom1]}{atom1}"] += np.array([gradientx_atom1, gradienty_atom1, gradientz_atom1])
-                    gradients[f"{atom_types[atom2]}{atom2}"] += np.array([gradientx_atom2, gradienty_atom2, gradientz_atom2])
-                    print(f"Atom: {atom_types[atom1]}{atom1}, Gradient: {np.array([gradientx_atom1, gradienty_atom1, gradientz_atom1])}")
+                        x1 = atom_coords[str(atom1)][0]
+                        y1 = atom_coords[str(atom1)][1]
+                        z1 = atom_coords[str(atom1)][2]
+                        x2 = atom_coords[str(atom2)][0]
+                        y2 = atom_coords[str(atom2)][1]
+                        z2 = atom_coords[str(atom2)][2]
+                        Aij = 4 * epsilon * sigma**12
+                        Bij = 4 * epsilon * sigma**6
+                        r = np.array(atom_coords[atom1]) - np.array(atom_coords[atom2])
+                        r_norm = np.linalg.norm(r)
+                        gradientx_atom1 = (x1 - x2) * (((-12 * Aij)/r_norm**14) + ((6 * Bij)/r_norm**8))
+                        gradienty_atom1 = (y1 - y2) * (((-12 * Aij)/r_norm**14) + ((6 * Bij)/r_norm**8))
+                        gradientz_atom1 = (z1 - z2) * (((-12 * Aij)/r_norm**14) + ((6 * Bij)/r_norm**8))
+                        gradientx_atom2 = (x2 - x1) * (((-12 * Aij)/r_norm**14) + ((6 * Bij)/r_norm**8))
+                        gradienty_atom2 = (y2 - y1) * (((-12 * Aij)/r_norm**14) + ((6 * Bij)/r_norm**8))
+                        gradientz_atom2 = (z2 - z1) * (((-12 * Aij)/r_norm**14) + ((6 * Bij)/r_norm**8))
+                        gradients[f"{atom_types[atom1]}{atom1}"] += np.array([gradientx_atom1, gradienty_atom1, gradientz_atom1])
+                        gradients[f"{atom_types[atom2]}{atom2}"] += np.array([gradientx_atom2, gradienty_atom2, gradientz_atom2])
+                        # print(f"Atom: {atom_types[atom1]}{atom1}, Gradient: {np.array([gradientx_atom1, gradienty_atom1, gradientz_atom1])}")
+    print(f"Gradient:", gradients)
     return gradients
 
 
@@ -1018,7 +1024,7 @@ def debug(file_name):
     # print("Dihedral angle gradient:")
 
     # Calculate VDW gradient
-    # print("\nCalculating VDW gradient...")
-    # vdw_gradient = calculate_vdw_gradient(file_name, atom_types)
+    print("\nCalculating VDW gradient...")
+    vdw_gradient = calculate_vdw_gradient(file_name, atom_types)
     
 
