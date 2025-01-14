@@ -71,31 +71,32 @@ def debug(file_name):
     print("\nCalculating total energy...")
     energies.total_energy(file_name, atom_types, print_energies=True)
 
-    # # Calculate bond stretching gradient
-    # print("\nCalculating bond stretching gradient...")
-    # bond_stretching_gradient = gradients.calculate_bond_stretching_gradient(file_name, atom_types)
-    # print("Bond stretching gradient:")
-    # print(bond_stretching_gradient)
+    # Calculate bond stretching gradient
+    print("\nCalculating bond stretching gradient...")
+    bond_stretching_gradient = gradients.calculate_bond_stretching_gradient(file_name, atom_types)
+    print("Bond stretching gradient:")
+    print(bond_stretching_gradient)
 
-    # # Calculate angle bending gradient
-    # print("\nCalculating angle bending gradient...")
-    # angle_bending_gradient = gradients.calculate_angle_bending_gradient(file_name, atom_types)
-    # print("Angle bending gradient:")
-    # print(angle_bending_gradient)
+    # Calculate angle bending gradient
+    print("\nCalculating angle bending gradient...")
+    angle_bending_gradient = gradients.calculate_angle_bending_gradient(file_name, atom_types)
+    print("Angle bending gradient:")
+    print(angle_bending_gradient)
 
     # Calculate dihedral angle gradient
     print("\nCalculating dihedral angle gradient...")
     dihedral_angle_gradient = gradients.calculate_dihedral_angle_gradient(file_name,atom_coords, bonds, atom_types)
-    # print("Dihedral angle gradient:")
+    print("Dihedral angle gradient:")
+    print(dihedral_angle_gradient)
 
-    # # Calculate VDW gradient
-    # print("\nCalculating VDW gradient...")
-    # vdw_gradient = gradients.calculate_vdw_gradient(file_name, atom_types)
+    # Calculate VDW gradient
+    print("\nCalculating VDW gradient...")
+    vdw_gradient = gradients.calculate_vdw_gradient(file_name, atom_types)
 
-    # # Calculate full gradient
-    # print("\nCalculating full gradient...")
-    # full_gradient = gradients.gradient_full(file_name, atom_types, atom_coords, bonds, num_atoms)
-    # print("Full gradient:")
-    # print(full_gradient)
+    # Calculate full gradient
+    print("\nCalculating full gradient...")
+    full_gradient = gradients.gradient_full(file_name, atom_types, atom_coords, bonds, num_atoms)
+    print("Full gradient:")
+    print(full_gradient)
     
 

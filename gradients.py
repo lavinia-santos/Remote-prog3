@@ -214,7 +214,9 @@ def calculate_dihedral_angle_gradient(file,atom_coords, bonds,atom_types):
     # Iterar pelas cadeias de quatro átomos
     for chain in chains_of_four:
         # Normalizar a cadeia: garantir uma ordem única
-        normalized_chain = tuple(sorted(chain, key=lambda x: (x[1:], x[0])))
+        # print("Original Chain:", chain)
+        normalized_chain = tuple(sorted(chain, key=lambda x: int(x[1:])))
+        # normalized_chain = tuple(sorted(chain, key=lambda x: (x[1:], x[0])))
         # print("Normalized chain:", normalized_chain)
         
         # Ignorar se já processado
@@ -223,10 +225,10 @@ def calculate_dihedral_angle_gradient(file,atom_coords, bonds,atom_types):
         
         # Adicionar ao conjunto de cadeias processadas
         processed_chains.add(normalized_chain)
-        print("Processed chains:", processed_chains)
+        # print("Processed chains:", processed_chains)
 
         atom1, atom2, atom3, atom4 = chain
-        print("Calculating dihedral angle gradient for chain:", atom1, atom2, atom3, atom4)
+        # print("Calculating dihedral angle gradient for chain:", atom1, atom2, atom3, atom4)
         
         
         # Coordinates of the atoms
@@ -290,7 +292,7 @@ def calculate_dihedral_angle_gradient(file,atom_coords, bonds,atom_types):
         gradients[f"{atom2}"] += gradient2
         gradients[f"{atom3}"] += gradient3
         gradients[f"{atom4}"] += gradient4
-        print("Gradients:", gradients)
+        # print("Gradients:", gradients)
 
 
         # print(f"After update: {atom1}, Gradient1: {gradients[f'{atom1}']}")
