@@ -90,9 +90,9 @@ def calculate_angle_bending_gradient(file, atom_types):
         atom3_letter = str(atom3[0])
         # print("atom1 angle letter:", atom1_letter)
 
-        atom1_number = str(atom1[1])
-        atom2_number = str(atom2[1])
-        atom3_number = str(atom3[1])
+        atom1_number = str(atom1[1:])
+        atom2_number = str(atom2[1:])
+        atom3_number = str(atom3[1:])
         # print("atom1 angle number:", atom1_number)
         
         # Extract possible keys for the angle
@@ -214,7 +214,8 @@ def calculate_dihedral_angle_gradient(file,atom_coords, bonds,atom_types):
     # Iterar pelas cadeias de quatro átomos
     for chain in chains_of_four:
         # Normalizar a cadeia: garantir uma ordem única
-        normalized_chain = tuple(sorted(chain, key=lambda x: (x[1], x[0])))
+        normalized_chain = tuple(sorted(chain, key=lambda x: (x[1:], x[0])))
+        # print("Normalized chain:", normalized_chain)
         
         # Ignorar se já processado
         if normalized_chain in processed_chains:
@@ -222,16 +223,17 @@ def calculate_dihedral_angle_gradient(file,atom_coords, bonds,atom_types):
         
         # Adicionar ao conjunto de cadeias processadas
         processed_chains.add(normalized_chain)
+        print("Processed chains:", processed_chains)
 
         atom1, atom2, atom3, atom4 = chain
         print("Calculating dihedral angle gradient for chain:", atom1, atom2, atom3, atom4)
         
         
         # Coordinates of the atoms
-        coord1 = atom_coords[str(atom1[1])]
-        coord2 = atom_coords[str(atom2[1])]
-        coord3 = atom_coords[str(atom3[1])]
-        coord4 = atom_coords[str(atom4[1])]
+        coord1 = atom_coords[str(atom1[1:])]
+        coord2 = atom_coords[str(atom2[1:])]
+        coord3 = atom_coords[str(atom3[1:])]
+        coord4 = atom_coords[str(atom4[1:])]
         # print("coord1:",atom1, coord1)
         # print("coord2:",atom2, coord2)
         # print("coord3:", atom3, coord3)
@@ -245,6 +247,8 @@ def calculate_dihedral_angle_gradient(file,atom_coords, bonds,atom_types):
         # print("rab:", rab)
         # print("rbc:", rbc)
         # print("rcd:", rcd)
+        # print("rac:", rac)
+        # print("rbd:", rbd)
 
         t = np.cross(rab, rbc)
         u = np.cross(rbc, rcd)
@@ -275,26 +279,20 @@ def calculate_dihedral_angle_gradient(file,atom_coords, bonds,atom_types):
         
         gradient2 = derivative * ((np.cross(rac,((np.cross(t,rbc))/(t_norm2 * rbc_norm)))) + (np.cross(((np.cross(-u,rbc))/(u_norm2*rbc_norm)),rcd)))
         gradient3 = derivative * ((np.cross((txrbc/(t_norm2*rbc_norm)),rab)) + (np.cross(rbd,(minusuxrbc/(u_norm2*rbc_norm)))))
-        # print(f"Atom: {atom1}, Gradient: {gradient1}")
-        # print(f"Atom: {atom4}, Gradient: {gradient4}")
-        # print(f"Atom: {atom2}, Gradient: {gradient2}")
-        # print(f"Atom: {atom3}, Gradient: {gradient3}")
 
-
-        # print(f"Atom: {atom1}, Gradient: {gradients[f'{atom1}']}")
-        # print(f"Atom: {atom2}, Gradient: {gradients[f'{atom2}']}")
-        # print(f"Atom: {atom3}, Gradient: {gradients[f'{atom3}']}")
-        # print(f"Atom: {atom4}, Gradient: {gradients[f'{atom4}']}")
-        # print("Gradients:", gradients)
         # print(f"Before update: {atom1}, Gradient1: {gradients[f'{atom1}']}")
         # print(f"Before update: {atom2}, Gradient2: {gradients[f'{atom2}']}")
         # print(f"Before update: {atom3}, Gradient3: {gradients[f'{atom3}']}")
         # print(f"Before update: {atom4}, Gradient4: {gradients[f'{atom4}']}")
+
+
         gradients[f"{atom1}"] += gradient1
         gradients[f"{atom2}"] += gradient2
         gradients[f"{atom3}"] += gradient3
         gradients[f"{atom4}"] += gradient4
         print("Gradients:", gradients)
+
+
         # print(f"After update: {atom1}, Gradient1: {gradients[f'{atom1}']}")
         # print(f"After update: {atom2}, Gradient2: {gradients[f'{atom2}']}")
         # print(f"After update: {atom3}, Gradient3: {gradients[f'{atom3}']}")

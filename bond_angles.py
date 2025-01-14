@@ -140,20 +140,20 @@ def calculate_torsion_angle(atom_coords, bonds, atom_types):
                     label4 = f"{atom_types[str(atom4)]}{atom4}"
                     chains_of_four.append((label1, label2, label3, label4))
 
-    print("Cadeias de quatro átomos encontradas:", chains_of_four)
+    # print("Cadeias de quatro átomos encontradas:", chains_of_four)
 
     # Calcular os ângulos de torção para cada cadeia válida
     for chain in chains_of_four:
         atom1, atom2, atom3, atom4 = chain
-        print("Calculando ângulo de torção para a cadeia:", atom1, atom2, atom3, atom4)
+        # print("Calculando ângulo de torção para a cadeia:", atom1, atom2, atom3, atom4)
 
         # print("atom_coords:", atom_coords)
-        coord1 = atom_coords[str(atom1[1])]
-        coord2 = atom_coords[str(atom2[1])]
-        coord3 = atom_coords[str(atom3[1])]
-        coord4 = atom_coords[str(atom4[1])]
+        coord1 = atom_coords[str(atom1[1:])]
+        coord2 = atom_coords[str(atom2[1:])]
+        coord3 = atom_coords[str(atom3[1:])]
+        coord4 = atom_coords[str(atom4[1:])]
         
-        print("Coordenadas dos átomos:", coord1, coord2, coord3, coord4)
+        # print("Coordenadas dos átomos:", coord1, coord2, coord3, coord4)
         # Vetores
         vector1 = np.array([coord2[i] - coord1[i] for i in range(3)])
         vector2 = np.array([coord3[i] - coord2[i] for i in range(3)])
@@ -189,8 +189,8 @@ def calculate_torsion_angle(atom_coords, bonds, atom_types):
 
     if not torsion_angles:
         print("Nenhuma cadeia de quatro átomos conectados foi encontrada para calcular ângulos de torção.")
-    else:
-        print("Ângulos de torção calculados:", torsion_angles)
+    # else:
+    #     print("Ângulos de torção calculados:", torsion_angles)
 
     return torsion_angles, chains_of_four
 

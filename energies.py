@@ -21,7 +21,7 @@ def calculate_bond_stretching_energy(file, atom_types, print_energies=False):
 
     # Calculate bond lengths
     bond_lengths = bond_angles.bond_length_all(file)
-    print("Bond lengths:", bond_lengths)
+    # print("Bond lengths:", bond_lengths)
 
     # Calculate bond stretching energy for each bond
     bond_stretching_energies = {}
@@ -128,8 +128,8 @@ def calculate_angle_bending_energy(file, atom_types, print_energies=False):
             continue
         
         # Calcular a energia
-        print("angle_value:", angle_value)
-        print("theta_eq:", theta_eq)
+        # print("angle_value:", angle_value)
+        # print("theta_eq:", theta_eq)
         energy = k_angle * (angle_value - theta_eq) ** 2
         angle_bending_energies[angle_key_1] = energy
         energies.append(energy)
@@ -152,12 +152,12 @@ def calculate_torsion_energy(file, atom_types, print_energies=False):
     num_atoms, num_bonds, num_atom_types, atom_coords, bonds, _ = read_input(file, dev=True)
     
     # Calcular ângulos de torção e garantir que sejam únicos
-    torsion_angles = calculate_torsion_angle(atom_coords, bonds, atom_types)
-    print("Torsion angles:", torsion_angles)
+    torsion_angles = bond_angles.calculate_torsion_angle(atom_coords, bonds, atom_types)
+    # print("Torsion angles:", torsion_angles)
     # Remover duplicatas
     unique_torsion_angles = list(set([angle for angle in torsion_angles[0].values()]))
     
-    print("Unique torsion angles:", unique_torsion_angles)
+    # print("Unique torsion angles:", unique_torsion_angles)
     
     torsion_energy = {}
     for angle in unique_torsion_angles:
@@ -228,6 +228,7 @@ def calculate_VDW_energy(file, atom_types, print_energies=False, debug=False):
                         unique_pairs.add(pair)
                         atom1 = str(atom)
                         atom2 = str(atom2)
+                        # print(f"atom_types: {atom_types}")
                         bond_key = f"{atom_types[atom1]}{atom_types[atom2]}"
                         r = np.linalg.norm(np.array(atom_coords[atom1]) - np.array(atom_coords[atom2]))
                         if bond_key == 'HH':
