@@ -40,7 +40,9 @@ def optimize_bfgs (file_name):
     M = np.identity(3 * num_atoms)
     M0 = M * (1/300)  # Set the initial inverse Hessian approximation to a small value, B^-1
 
-    for k in range(1, 18):
+    threshold = 0.002 # to be confirmed
+
+    for k in range(1, 100):
         
         if k == 1:
             # Bk = M0 #B0^-1
@@ -138,10 +140,18 @@ def optimize_bfgs (file_name):
                 vk_x_sk = np.outer(vk,sk1)
                 sk_x_vk = np.outer(sk1,vk)
 
+                
+
 
                 Mk1 = M0 + ((np.dot((sk_dot_yk + yk_dot_vk),sk_x_sk))/(sk_dot_yk**2)) - ((vk_x_sk + sk_x_vk)/(sk_dot_yk))
                 print("Mk:",Mk1)
                 print("step k finalized:",k)
+
+                delta_E = E_k1 - E0
+                if np.abs(delta_E) <= threshold:
+                    print("delta_E:",delta_E)
+                    print("Convergence reached on k:",k)
+                    break
                 # print("Bk:",Bk)
                 
                 # print("yk:",yk)
@@ -186,6 +196,8 @@ def optimize_bfgs (file_name):
             # print("sk after update:",sk)
             # print("atom_coords_new:",atom_coords_new)
             # print("atom_coords_new:",atom_coords_new)
+
+            
             
             E_k = energies.total_energy(file_name, atom_types, read_coordinates_from_file=False, coordinates=atom_coords_new)
             # print("E_k:",E_k)
@@ -248,6 +260,12 @@ def optimize_bfgs (file_name):
                 sk_x_sk = np.outer(sk,sk)
                 vk_x_sk = np.outer(vk,sk)
                 sk_x_vk = np.outer(sk,vk)
+
+                delta_E = E_k - E_k1
+                print("delta_E:",delta_E,"k:",k)
+                if np.abs(delta_E) <= threshold:
+                    print("Convergence reached on k:",k)
+                    break
 
 
                 Mk_new = Mk1 + ((np.dot((sk_dot_yk + yk_dot_vk),sk_x_sk))/(sk_dot_yk**2)) - ((vk_x_sk + sk_x_vk)/(sk_dot_yk))
