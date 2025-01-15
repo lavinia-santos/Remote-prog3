@@ -40,7 +40,7 @@ def optimize_bfgs (file_name):
     M = np.identity(3 * num_atoms)
     M0 = M * (1/300)  # Set the initial inverse Hessian approximation to a small value, B^-1
 
-    for k in range(1, 10):
+    for k in range(1, 18):
         
         if k == 1:
             # Bk = M0 #B0^-1
@@ -141,6 +141,7 @@ def optimize_bfgs (file_name):
 
                 Mk1 = M0 + ((np.dot((sk_dot_yk + yk_dot_vk),sk_x_sk))/(sk_dot_yk**2)) - ((vk_x_sk + sk_x_vk)/(sk_dot_yk))
                 print("Mk:",Mk1)
+                print("step k finalized:",k)
                 # print("Bk:",Bk)
                 
                 # print("yk:",yk)
@@ -150,98 +151,113 @@ def optimize_bfgs (file_name):
             
             print("k is not 1, i is:",k)
             # grad_rk_values_flat = grad_rk1_values.flatten()
-            # pk = -np.dot(Mk1, grad_rk_values_flat)
-            # print("pk:",pk)
+            grad_1_values_flat = grad_1_values.flatten()
+            pk = -np.dot(Mk1, grad_1_values_flat)
+            print("pk:",pk)
 
-            # pk_flat = pk.flatten()
+            pk_flat = pk.flatten()
+            # print("pk_flat:",pk_flat)
 
-            # alpha = 0.8
-
+            alpha = 0.8
             
-            # sk = alpha * pk_flat
-            # print("sk:",sk)
-            # if np.linalg.norm(sk) > 0.3:
-            #     sk = sk * (0.3 / np.linalg.norm(sk))
-            # print("atom_coords_old:",atom_coords_new)
-            # atom_coords_new = {}
-            # # for i in range(1, num_atoms + 1):
-            # #     atom_coords_new[str(i)] = atom_coords[str(i)] + sk[3 * (i-1):3 * (i)]
-            # for i in range(1, num_atoms + 1):   
-            #     step_k = alpha * pk[i - 1] #sk = alphak * pk
-            #     step_k_norm = np.linalg.norm(step_k)
-            #     if step_k_norm > 0.3:
-            #         step_k = step_k * (0.3 / step_k_norm)
-            #     print("step_k:",step_k)
-            #     atom_coords_new[str(i)] = atom_coords[str(i)] + step_k # r_k+1 = r_k + sk
             
+            sk = alpha * pk_flat
+            print("sk:",sk)
+            if np.linalg.norm(sk) > 0.3:
+                sk = sk * (0.3 / np.linalg.norm(sk))
+            print("atom_coords_old:",atom_coords_new)
+            atom_coords = atom_coords_new
+            atom_coords_new = {}
+            
+            # for i in range(1, num_atoms + 1):
+            #     atom_coords_new[str(i)] = atom_coords[str(i)] + sk[3 * (i-1):3 * (i)]
+            for i in range(1, num_atoms + 1):   
+                step_k = alpha * pk[i - 1] #sk = alphak * pk
+                step_k_norm = np.linalg.norm(step_k)
+                # print("step_k_norm:",step_k_norm)
+                if step_k_norm > 0.3:
+                    step_k = step_k * (0.3 / step_k_norm)
+                # print("step_k:",step_k)
+                # print("atom_coords_broken:",atom_coords[str(i)])
+                # print("sk to be added:",sk[3 * (i-1):3 * (i)])
+                atom_coords_new[str(i)] = atom_coords[str(i)] + sk[3 * (i-1):3 * (i)]
+                # print("atom_coords_broken after update:",atom_coords_new[str(i)])
+                # atom_coords_new[str(i)] = atom_coords[str(i)] + step_k # r_k+1 = r_k + sk
+            # print("sk after update:",sk)
+            # print("atom_coords_new:",atom_coords_new)
             # print("atom_coords_new:",atom_coords_new)
             
-            # E_k = energies.total_energy(file_name, atom_types, read_coordinates_from_file=False, coordinates=atom_coords_new)
+            E_k = energies.total_energy(file_name, atom_types, read_coordinates_from_file=False, coordinates=atom_coords_new)
             # print("E_k:",E_k)
-            # #check wolfe condition
-            # c1 = 0.1
+            #check wolfe condition
+            c1 = 0.1
 
-            # i_lim = 100
-            # i_count = 0
+            i_lim = 10
+            i_count = 0
 
-            # while E_k > E_k1 + (c1 * alpha * np.dot(pk_flat,grad_rk_values_flat)):
-            #     print("Wolfe condition not satisfied")
-                
+            while E_k > E_k1 + (c1 * alpha * np.dot(pk_flat,grad_1_values_flat)):
+                print("Wolfe condition not satisfied")
+                alpha = alpha * 0.8
+                print("new alpha:",alpha)
+                # print("E_k-1:",E_k1)
+                print("E_k anterior:",E_k)
+                # print("wolf term:",E_k1 + (c1 * alpha * np.dot(pk_flat,grad_rk_values_flat)))
 
-            #     alpha = alpha * 0.8
-            #     print("new alpha:",alpha)
-            #     print("E_k-1:",E_k1)
-            #     print("E_k:",E_k)
-            #     print("wolf term:",E_k1 + (c1 * alpha * np.dot(pk_flat,grad_rk_values_flat)))
+                sk = alpha * pk_flat
+                # if np.linalg.norm(sk) > 0.3:
+                #     sk = sk * (0.3 / np.linalg.norm(sk))
 
-            #     sk = alpha * pk_flat
-            #     # if np.linalg.norm(sk) > 0.3:
-            #     #     sk = sk * (0.3 / np.linalg.norm(sk))
-
-            #     # for i in range(1, num_atoms + 1):
-            #     #     atom_coords_new[str(i)] = atom_coords[str(i)] + sk[3 * (i-1) : 3 * (i)]
+                # for i in range(1, num_atoms + 1):
+                #     atom_coords_new[str(i)] = atom_coords[str(i)] + sk[3 * (i-1) : 3 * (i)]
             
-            #     # E_k = energies.total_energy(file_name, atom_types, read_coordinates_from_file=False, coordinates=atom_coords_new)   
+                # E_k = energies.total_energy(file_name, atom_types, read_coordinates_from_file=False, coordinates=atom_coords_new)   
             
-            #     for i in range(1, num_atoms + 1):
-            #             step_k = alpha * pk[i - 1] #sk = alphak * pk
-            #             step_k_norm = np.linalg.norm(step_k)
-            #             if step_k_norm > 0.3:
-            #                 step_k = step_k * (0.3 / step_k_norm)
-            #             atom_coords_new[str(i)] = atom_coords[str(i)] + step_k # r_k+1 = r_k + sk
-            #     E_k = energies.total_energy(file_name, atom_types, read_coordinates_from_file=False, coordinates=atom_coords_new)
-            #     # Incrementando o contador e verificando o limite de iterações
-            #     i_count += 1
-            #     print("i_count:",i_count)
-            #     if i_count >= i_lim:
-            #         print("Iteration limit reached for debugging.")
-            #         print("k:",k)
-            #         break
-            # else:
-            #     print("Wolfe condition satisfied")
-            #     print("alpha:",alpha)
-            #     print("E_k-1:",E_k1)
-            #     print("E_k:",E_k) #actual final energy for rk+1
-            #     print("grad_rk-1_values:",grad_rk1_values)
-            #     grad_rk_new = gradients.calculate_bond_stretching_gradient(file_name, atom_types, read_coordinates_from_file=False, coordinates=atom_coords_new)
-            #     grad_rk_new_values = np.array(list(grad_rk_new.values()))
-            #     print("grad_rk_values:",grad_rk_new_values)
-            #     yk = grad_rk_new_values - grad_rk1_values
-            #     yk_flat = yk.flatten()
-            #     vk = np.dot(Mk1,yk_flat)
-            #     sk_dot_yk = np.dot(sk,yk_flat)
-            #     yk_dot_vk = np.dot(yk_flat,vk)
-            #     sk_x_sk = np.outer(sk,sk)
-            #     vk_x_sk = np.outer(vk,sk)
-            #     sk_x_vk = np.outer(sk,vk)
+                for i in range(1, num_atoms + 1):
+                        step_k = alpha * pk[i - 1] #sk = alphak * pk
+                        step_k_norm = np.linalg.norm(step_k)
+                        if step_k_norm > 0.3:
+                            step_k = step_k * (0.3 / step_k_norm)
+                        # atom_coords_new[str(i)] = atom_coords[str(i)] + step_k # r_k+1 = r_k + sk
+                        atom_coords_new[str(i)] = atom_coords[str(i)] + sk[3 * (i-1):3 * (i)]
+                print("coords-new",atom_coords_new)
+                E_k = energies.total_energy(file_name, atom_types, read_coordinates_from_file=False, coordinates=atom_coords_new)
+                # Incrementando o contador e verificando o limite de iterações
+                print("E_k before else do while:",E_k)
+                i_count += 1
+                print("i_count:",i_count)
+                if i_count >= i_lim:
+                    print("Iteration limit reached for debugging.")
+                    print("k:",k)
+                    break
+            else:
+                print("Wolfe condition satisfied")
+                print("alpha:",alpha)
+                print("E_k-1:",E_k1)
+                print("E_k:",E_k) #actual final energy for rk+1
+                print("grad_k-1_values:",grad_1_values)
+                # grad_rk_new = gradients.calculate_bond_stretching_gradient(file_name, atom_types, read_coordinates_from_file=False, coordinates=atom_coords_new)
+                # grad_rk_new_values = np.array(list(grad_rk_new.values()))
+                grad_k_new = gradients.gradient_full(file_name, atom_types, atom_coords_new, bonds, num_atoms, read_coordinates_from_file=False, coordinates=atom_coords_new)
+                grad_k_new_values = np.array(list(grad_k_new.values()))
+                print("grad_k_values:",grad_k_new_values)
+                yk = grad_k_new_values - grad_1_values
+                yk_flat = yk.flatten()
+                vk = np.dot(Mk1,yk_flat)
+                sk_dot_yk = np.dot(sk,yk_flat)
+                yk_dot_vk = np.dot(yk_flat,vk)
+                sk_x_sk = np.outer(sk,sk)
+                vk_x_sk = np.outer(vk,sk)
+                sk_x_vk = np.outer(sk,vk)
 
 
-            #     Mk_new = Mk1 + ((np.dot((sk_dot_yk + yk_dot_vk),sk_x_sk))/(sk_dot_yk**2)) - ((vk_x_sk + sk_x_vk)/(sk_dot_yk))
-            #     print("Mk:",Mk_new)
+                Mk_new = Mk1 + ((np.dot((sk_dot_yk + yk_dot_vk),sk_x_sk))/(sk_dot_yk**2)) - ((vk_x_sk + sk_x_vk)/(sk_dot_yk))
+                print("Mk:",Mk_new)
 
-            #     grad_rk1_values = grad_rk_new_values
-            #     E_k1 = E_k
-            #     Mk1 = Mk_new
+                # grad_rk1_values = grad_rk_new_values
+                grad_0_values = grad_1_values
+                grad_1_values = grad_k_new_values
+                E_k1 = E_k
+                Mk1 = Mk_new
                 
 
 
