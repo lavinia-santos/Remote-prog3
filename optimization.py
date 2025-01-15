@@ -112,14 +112,15 @@ def optimize_bfgs (file_name):
 
                     # atom_coords_new[str(i)] = atom_coords[str(i)] + step_k # r_k+1 = r_k + sk
                 E_k1 = energies.total_energy(file_name, atom_types, read_coordinates_from_file=False, coordinates=atom_coords_new)
+                print("E_k1 before else do while:",E_k1)
             else:
                 print("Wolfe condition satisfied")
                 print("alpha:",alpha)
                 print("E0:",E0)
                 print("E_k:",E_k1) #actual final energy for rk+1
                 print("atom_coords_new:",atom_coords_new)
-                grad_rk1 = gradients.calculate_bond_stretching_gradient(file_name, atom_types, read_coordinates_from_file=False, coordinates=atom_coords_new)
-                grad_rk1_values = np.array(list(grad_rk1.values()))
+                # grad_rk1 = gradients.calculate_bond_stretching_gradient(file_name, atom_types, read_coordinates_from_file=False, coordinates=atom_coords_new)
+                # grad_rk1_values = np.array(list(grad_rk1.values()))
                 grad_1 = gradients.gradient_full(file_name, atom_types, atom_coords_new, bonds, num_atoms, read_coordinates_from_file=False, coordinates=atom_coords_new)
                 grad_1_values = np.array(list(grad_1.values()))
                 # print("grad_r0_values:",grad_r0_values)

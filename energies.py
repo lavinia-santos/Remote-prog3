@@ -64,7 +64,7 @@ def calculate_bond_stretching_energy(file, atom_types, read_coordinates_from_fil
     return bond_stretching_energies, sum_energy
 
 
-def calculate_angle_bending_energy(file, atom_types, print_energies=False):
+def calculate_angle_bending_energy(file, atom_types, print_energies=False, read_coordinates_from_file=True,coordinates=None):
     """
     Esta função calcula a energia de flexão para todos os ângulos na molécula.
     A energia é calculada usando a fórmula: E_ângulo = ka * (θ - θ0)^2
@@ -80,7 +80,8 @@ def calculate_angle_bending_energy(file, atom_types, print_energies=False):
     # print(ka)
     # Obter informações da molécula
     num_atoms, num_bonds, num_atom_types, atom_coords, bonds, atom_types = read_input(file, dev=True)
-    
+    if read_coordinates_from_file == False:
+        atom_coords = coordinates
     # Calcular os ângulos
     angles = bond_angles.calculate_angles_from_bonds(atom_coords, bonds, atom_types)
     
@@ -143,7 +144,7 @@ def calculate_angle_bending_energy(file, atom_types, print_energies=False):
 
 
 
-def calculate_torsion_energy(file, atom_types, print_energies=False):
+def calculate_torsion_energy(file, atom_types, print_energies=False, read_coordinates_from_file=True,coordinates=None):
     # Ler parâmetros
     parameters = read_parameters()
     Aphi = parameters['Aphi']
@@ -152,6 +153,8 @@ def calculate_torsion_energy(file, atom_types, print_energies=False):
     n = 3
     energies=[]
     num_atoms, num_bonds, num_atom_types, atom_coords, bonds, _ = read_input(file, dev=True)
+    if read_coordinates_from_file == False:
+        atom_coords = coordinates
     
     # Calcular ângulos de torção e garantir que sejam únicos
     torsion_angles = bond_angles.calculate_torsion_angle(atom_coords, bonds, atom_types)
@@ -180,11 +183,13 @@ def calculate_torsion_energy(file, atom_types, print_energies=False):
     return torsion_energy, sum_energy
 
 
-def calculate_VDW_energy(file, atom_types, print_energies=False, debug=False):
+def calculate_VDW_energy(file, atom_types, print_energies=False, debug=False, read_coordinates_from_file=True,coordinates=None):
     sigma_i = read_parameters()['sigma_i']
     epsilon_i = read_parameters()['epsilon_i']
     energies=[]
     num_atoms, num_bonds, num_atom_types, atom_coords, bonds, _ = read_input(file, dev=True)
+    if read_coordinates_from_file == False:
+        atom_coords = coordinates
     # bond_lengths = bond_length_all(file)
     #get sigma H,C and epsilon H,C
     sigma_H = float(sigma_i['H'])
@@ -265,15 +270,15 @@ def total_energy(file, atom_types,read_coordinates_from_file = True,coordinates=
     sum_bond_stretching_energy = bond_stretching_energies[1]
     
     # Calculate angle bending energies
-    angle_bending_energies = calculate_angle_bending_energy(file, atom_types)
+    angle_bending_energies = calculate_angle_bending_energy(file, atom_types, coordinates=coordinates,read_coordinates_from_file=read_coordinates_from_file)
     sum_angle_bending_energy = angle_bending_energies[1]
     
     # Calculate torsion energies
-    torsion_energies = calculate_torsion_energy(file, atom_types)
+    torsion_energies = calculate_torsion_energy(file, atom_types, coordinates=coordinates,read_coordinates_from_file=read_coordinates_from_file)
     sum_torsion_energy = torsion_energies[1]
     
     # Calculate VDW energies
-    VDW_energy = calculate_VDW_energy(file, atom_types)
+    VDW_energy = calculate_VDW_energy(file, atom_types, coordinates=coordinates,read_coordinates_from_file=read_coordinates_from_file)
     
     # Total energy
     total_energy = sum_bond_stretching_energy + sum_angle_bending_energy + sum_torsion_energy + VDW_energy

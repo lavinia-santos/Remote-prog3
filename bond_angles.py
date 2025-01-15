@@ -52,7 +52,7 @@ def calculate_angle(coord1, coord2, coord3):
     angle_deg = math.degrees(angle_rad)
     return angle_rad
 
-def calculate_angles_from_bonds(atom_coords, bonds, atom_types):
+def calculate_angles_from_bonds(atom_coords, bonds, atom_types, read_coordinates_from_file=True):
     """
     Calculate all angles from the bonds provided, using atom coordinates.
     The angles are formed between triplets of atoms: (atom1 - atom2 - atom3)
@@ -109,7 +109,7 @@ def print_angles_with_atom_types(file_name):
 
 
 
-def calculate_torsion_angle(atom_coords, bonds, atom_types):
+def calculate_torsion_angle(atom_coords, bonds, atom_types, read_coordinates_from_file=True):
     """
     Calculates the torsion angle formed by chains of four atoms (in degrees) based on atomic coordinates and bond information.
     """
@@ -152,6 +152,8 @@ def calculate_torsion_angle(atom_coords, bonds, atom_types):
     # Calcular os ângulos de torção para cada cadeia válida
     for chain in chains_of_four:
         atom1, atom2, atom3, atom4 = chain
+        if read_coordinates_from_file == False:
+            atom_coords = atom_coords
         # print("Calculando ângulo de torção para a cadeia:", atom1, atom2, atom3, atom4)
 
         # print("atom_coords:", atom_coords)
@@ -159,6 +161,8 @@ def calculate_torsion_angle(atom_coords, bonds, atom_types):
         coord2 = atom_coords[str(atom2[1:])]
         coord3 = atom_coords[str(atom3[1:])]
         coord4 = atom_coords[str(atom4[1:])]
+
+        
         
         # print("Coordenadas dos átomos:", coord1, coord2, coord3, coord4)
         # Vetores
