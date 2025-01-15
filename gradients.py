@@ -64,7 +64,7 @@ def calculate_bond_stretching_gradient(file, atom_types, read_coordinates_from_f
     
     return gradients
 
-def calculate_angle_bending_gradient(file, atom_types):
+def calculate_angle_bending_gradient(file, atom_types, read_coordinates_from_file=True, coordinates=None):
     """
     This function calculates the gradient of the angle bending energy with respect to the Cartesian coordinates.
     """
@@ -75,7 +75,8 @@ def calculate_angle_bending_gradient(file, atom_types):
     
     # Get molecule information
     num_atoms, num_bonds, num_atom_types, atom_coords, bonds, _ = read_input(file, dev=True)
-    
+    if read_coordinates_from_file == False:
+        atom_coords = coordinates 
     # Calculate angles
     angles = bond_angles.calculate_angles_from_bonds(atom_coords, bonds, atom_types)
     
@@ -192,11 +193,13 @@ def calculate_angle_bending_gradient(file, atom_types):
         
     return gradients
 
-def calculate_dihedral_angle_gradient(file,atom_coords, bonds,atom_types):
+def calculate_dihedral_angle_gradient(file,atom_coords, bonds,atom_types, read_coordinates_from_file=True, coordinates=None):
     """
     Calculates the gradient of the dihedral angle with respect to the Cartesian coordinates.
     """
     num_atoms, num_bonds, num_atom_types, atom_coords, bonds, _ = read_input(file, dev=True)
+    if read_coordinates_from_file == False:
+        atom_coords = coordinates 
     #initialize the gradient dictionary
     gradients = {f"{atom_types[str(i)]}{i}": np.zeros(3) for i in range(1, num_atoms + 1)}
     
@@ -304,7 +307,7 @@ def calculate_dihedral_angle_gradient(file,atom_coords, bonds,atom_types):
     return gradients
 
         
-def calculate_vdw_gradient(file, atom_types):
+def calculate_vdw_gradient(file, atom_types, read_coordinates_from_file=True, coordinates=None):
     """
     This function calculates the gradient of the VDW energy with respect to the Cartesian coordinates.
     """
@@ -315,7 +318,8 @@ def calculate_vdw_gradient(file, atom_types):
     
     # Get molecule information
     num_atoms, num_bonds, num_atom_types, atom_coords, bonds, _ = read_input(file, dev=True)
-    
+    if read_coordinates_from_file == False:
+        atom_coords = coordinates 
     # Calculate bond lengths
     bond_lengths = bond_angles.bond_length_all(file)
 
@@ -401,21 +405,21 @@ def calculate_vdw_gradient(file, atom_types):
     # print(f"Gradient:", gradients)
     return gradients
 
-def gradient_full(file, atom_types, atom_coords, bonds, num_atoms):
+def gradient_full(file, atom_types, atom_coords, bonds, num_atoms, read_coordinates_from_file=True, coordinates=None):
     """
     This function calculates the full gradient of the molecule by summing all gradient contributions.
     """
     # Calculate bond stretching gradient
-    bond_stretching_gradient = calculate_bond_stretching_gradient(file, atom_types)
+    bond_stretching_gradient = calculate_bond_stretching_gradient(file, atom_types, read_coordinates_from_file=read_coordinates_from_file, coordinates=coordinates)
     
     # Calculate angle bending gradient
-    angle_bending_gradient = calculate_angle_bending_gradient(file, atom_types)
+    angle_bending_gradient = calculate_angle_bending_gradient(file, atom_types, read_coordinates_from_file=read_coordinates_from_file, coordinates=coordinates)
     
     # Calculate dihedral angle gradient
-    dihedral_angle_gradient = calculate_dihedral_angle_gradient(file, atom_coords, bonds, atom_types)
+    dihedral_angle_gradient = calculate_dihedral_angle_gradient(file, atom_coords, bonds, atom_types, read_coordinates_from_file=read_coordinates_from_file, coordinates=coordinates)
     
     # Calculate VDW gradient
-    vdw_gradient = calculate_vdw_gradient(file, atom_types)
+    vdw_gradient = calculate_vdw_gradient(file, atom_types, read_coordinates_from_file=read_coordinates_from_file, coordinates=coordinates)
     
     # Total gradient
     total_gradient = {f"{atom_types[str(i)]}{i}": np.zeros(3) for i in range(1, num_atoms + 1)}
