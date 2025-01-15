@@ -58,7 +58,8 @@ def calculate_bond_stretching_energy(file, atom_types, read_coordinates_from_fil
             
     #sum the energies
     sum_energy = sum(energies)
-    print(f"Sum of bond stretching energies: {sum_energy:.6f} kcal/mol")
+    if print_energies:
+        print(f"Sum of bond stretching energies: {sum_energy:.6f} kcal/mol")
 
     return bond_stretching_energies, sum_energy
 
@@ -136,7 +137,8 @@ def calculate_angle_bending_energy(file, atom_types, print_energies=False):
         sum_energy = sum(energies)
         if print_energies:
             print(f"k_angle= {k_angle} Angle {angle_key_1}: Angle = {angle_value:.3f}, Energy = {energy:.3f} kcal/mol")
-    print(f"Sum of angle bending energies: {sum_energy:.6f} kcal/mol")
+    if print_energies:
+        print(f"Sum of angle bending energies: {sum_energy:.6f} kcal/mol")
     return angle_bending_energies, sum_energy
 
 
@@ -172,7 +174,8 @@ def calculate_torsion_energy(file, atom_types, print_energies=False):
             print(f"Angle {angle:.3f}, Energy = {energy:.6f} kcal/mol")
     
     sum_energy = sum(energies)
-    print(f"Sum of torsion energies: {sum_energy:.6f} kcal/mol")
+    if print_energies:
+        print(f"Sum of torsion energies: {sum_energy:.6f} kcal/mol")
     
     return torsion_energy, sum_energy
 
@@ -248,7 +251,8 @@ def calculate_VDW_energy(file, atom_types, print_energies=False, debug=False):
                             print(f"epsilon= {epsilon} kcal/mol, sigma= {sigma} Angstroms, VDW Bond {atom_types[atom1]}{atom1}-{atom_types[atom2]}{atom2}: Length = {r:.3f} Angstroms, Energy = {energy:.3f} kcal/mol")
 
     sum_energy = sum(energies)
-    print(f"Sum of VDW energies: {sum_energy:.6f} kcal/mol")
+    if print_energies:
+        print(f"Sum of VDW energies: {sum_energy:.6f} kcal/mol")
     return sum_energy
 
 def total_energy(file, atom_types,read_coordinates_from_file = True,coordinates=None, print_energies=False):

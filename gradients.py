@@ -7,7 +7,7 @@ import bond_angles
 
 
 
-def calculate_bond_stretching_gradient(file, atom_types):
+def calculate_bond_stretching_gradient(file, atom_types, read_coordinates_from_file=True, coordinates=None):
     """
     This function calculates the gradient of the bond stretching energy with respect to the Cartesian coordinates.
     """
@@ -18,9 +18,11 @@ def calculate_bond_stretching_gradient(file, atom_types):
     
     # Get molecule information
     num_atoms, num_bonds, num_atom_types, atom_coords, bonds, _ = read_input(file, dev=True)
+    if read_coordinates_from_file == False:
+        atom_coords = coordinates 
     
     # Calculate bond lengths
-    bond_lengths = bond_angles.bond_length_all(file)
+    bond_lengths = bond_angles.bond_length_all(file, read_coordinates_from_file=read_coordinates_from_file, coordinates=coordinates)
     
     # Initialize gradient dictionary
     gradients = {f"{atom_types[str(i)]}{i}": np.zeros(3) for i in range(1, num_atoms + 1)}
@@ -28,7 +30,7 @@ def calculate_bond_stretching_gradient(file, atom_types):
     # Calculate gradient for each bond
     for bond in bonds:
         atom1, atom2 = str(bond[0]), str(bond[1])
-        print("atom1 bond:", atom1)
+        # print("atom1 bond:", atom1)
         bond_key_number = f"{atom1}-{atom2}"
         reverse_key_number = f"{atom2}-{atom1}"
         bond_key = f"{atom_types[atom1]}{atom_types[atom2]}"
@@ -149,9 +151,9 @@ def calculate_angle_bending_gradient(file, atom_types):
         coord1 = atom_coords[atom1_number]
         coord2 = atom_coords[atom2_number]
         coord3 = atom_coords[atom3_number]
-        print("coord1:",atom1_letter,atom1_number, coord1)
-        print("coord2:",atom2_letter,atom2_number, coord2)
-        print("coord3:", atom3_letter,atom3_number,coord3)
+        # print("coord1:",atom1_letter,atom1_number, coord1)
+        # print("coord2:",atom2_letter,atom2_number, coord2)
+        # print("coord3:", atom3_letter,atom3_number,coord3)
         # if coord1 == 0 or coord2 == 0 or coord3 == 0:
         #     print("Warning: One of the atoms has no coordinates. Stopping.")
         #     break
@@ -184,7 +186,7 @@ def calculate_angle_bending_gradient(file, atom_types):
 
 
 
-        print(f"Atom: {atom2_letter}{atom2_number}, Gradient: {gradient2}")
+        # print(f"Atom: {atom2_letter}{atom2_number}, Gradient: {gradient2}")
         
         # Calculate the gradient for atom 3
         
@@ -205,7 +207,7 @@ def calculate_dihedral_angle_gradient(file,atom_coords, bonds,atom_types):
     
     torsion_angles, chains_of_four = bond_angles.calculate_torsion_angle(atom_coords, bonds, atom_types)
     # print("Chains of four atoms:", chains_of_four)
-    print("Torsion angles:", torsion_angles)
+    # print("Torsion angles:", torsion_angles)
     # unique_torsion_angles = list(set(torsion_angles.values()))
     # print("Unique torsion angles:", unique_torsion_angles)
     # Para armazenar cadeias únicas
@@ -396,7 +398,7 @@ def calculate_vdw_gradient(file, atom_types):
                         gradients[f"{atom_types[atom1]}{atom1}"] += np.array([gradientx_atom1, gradienty_atom1, gradientz_atom1])
                         gradients[f"{atom_types[atom2]}{atom2}"] += np.array([gradientx_atom2, gradienty_atom2, gradientz_atom2])
                         # print(f"Atom: {atom_types[atom1]}{atom1}, Gradient: {np.array([gradientx_atom1, gradienty_atom1, gradientz_atom1])}")
-    print(f"Gradient:", gradients)
+    # print(f"Gradient:", gradients)
     return gradients
 
 def gradient_full(file, atom_types, atom_coords, bonds, num_atoms):

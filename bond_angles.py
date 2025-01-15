@@ -129,7 +129,7 @@ def calculate_torsion_angle(atom_coords, bonds, atom_types):
         bonded_atoms[atom1].append(atom2)
         bonded_atoms[atom2].append(atom1)
 
-    print("Conexões de átomos:", bonded_atoms)
+    # print("Conexões de átomos:", bonded_atoms)
 
     # Encontrar todas as cadeias válidas de 4 átomos
     chains_of_four = []
