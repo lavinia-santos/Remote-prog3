@@ -35,7 +35,7 @@ def calculate_bond_stretching_gradient(file, atom_types):
         reverse_key = f"{atom_types[atom2]}{atom_types[atom1]}"
         
         # Get bond length
-        r = bond_lengths.get(bond_key_number) or bond_lengths.get(reverse_key_number)
+        r = bond_lengths[0].get(bond_key_number) or bond_lengths[0].get(reverse_key_number)
         
         # Get force parameters for the bond
         if bond_key in kb:

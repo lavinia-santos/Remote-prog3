@@ -5,11 +5,17 @@ import reading
 
 
 
-def bond_length_all(file, print_bond_length=False, check_bonds=False, print_dict=False):
+def bond_length_all(file,read_coordinates_from_file=True, coordinates=None, print_bond_length=False, check_bonds=False, print_dict=False):
     """
     This function calculates the bond length between all atoms in the molecule
     """
+
     num_atoms, num_bonds, num_atom_types, atom_coords, bonds, atom_types = reading.read_input(file, dev=True)
+
+    if read_coordinates_from_file == False:
+        atom_coords = coordinates    
+
+        
     bond_length = {}
     for bond in bonds:
         if check_bonds:
@@ -21,7 +27,8 @@ def bond_length_all(file, print_bond_length=False, check_bonds=False, print_dict
             print("The bond length between ", atom1, " and ", atom2, " is: ", bond_length[atom1 + '-' + atom2], " Angstroms")
     if print_dict:
         print(bond_length)
-    return bond_length
+    # print (bond_length, atom_coords)
+    return bond_length, atom_coords
 
 
 def calculate_angle(coord1, coord2, coord3):

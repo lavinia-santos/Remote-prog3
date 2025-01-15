@@ -5,7 +5,7 @@ from reading import read_parameters
 import bond_angles
 
 
-def calculate_bond_stretching_energy(file, atom_types, print_energies=False):
+def calculate_bond_stretching_energy(file, atom_types, read_coordinates_from_file=True,coordinates=None, print_energies=False):
     """
     This function calculates the bond stretching energy for all bonds in the molecule.
     The energy is computed using the formula: E_bond = kb * (r - r0)^2
@@ -20,7 +20,7 @@ def calculate_bond_stretching_energy(file, atom_types, print_energies=False):
     num_atoms, num_bonds, num_atom_types, atom_coords, bonds, _ = read_input(file, dev=True)
 
     # Calculate bond lengths
-    bond_lengths = bond_angles.bond_length_all(file)
+    bond_lengths = bond_angles.bond_length_all(file, read_coordinates_from_file=read_coordinates_from_file, coordinates=coordinates)
     # print("Bond lengths:", bond_lengths)
 
     # Calculate bond stretching energy for each bond
@@ -34,7 +34,7 @@ def calculate_bond_stretching_energy(file, atom_types, print_energies=False):
         reverse_key = f"{atom_types[str(atom2)]}{atom_types[str(atom1)]}"
 
         # Get bond length
-        r = bond_lengths.get(bond_key_number) or bond_lengths.get(reverse_key_number)
+        r = bond_lengths[0].get(bond_key_number) or bond_lengths[0].get(reverse_key_number)
         # print(r)
 
         # Get force parameters for the bond
@@ -251,12 +251,13 @@ def calculate_VDW_energy(file, atom_types, print_energies=False, debug=False):
     print(f"Sum of VDW energies: {sum_energy:.6f} kcal/mol")
     return sum_energy
 
-def total_energy(file, atom_types, print_energies=False):
+def total_energy(file, atom_types,read_coordinates_from_file = True,coordinates=None, print_energies=False):
     """
     This function calculates the total energy of the molecule by summing all energy contributions.
     """
     # Calculate bond stretching energies
-    bond_stretching_energies = calculate_bond_stretching_energy(file, atom_types)
+    # print("coordinates:", coordinates)
+    bond_stretching_energies = calculate_bond_stretching_energy(file, atom_types, coordinates=coordinates,read_coordinates_from_file=read_coordinates_from_file)
     sum_bond_stretching_energy = bond_stretching_energies[1]
     
     # Calculate angle bending energies
@@ -274,4 +275,6 @@ def total_energy(file, atom_types, print_energies=False):
     total_energy = sum_bond_stretching_energy + sum_angle_bending_energy + sum_torsion_energy + VDW_energy
     if print_energies:
         print(f"Total energy: {total_energy:.6f} kcal/mol")
+
+    return total_energy
 
