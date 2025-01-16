@@ -83,12 +83,12 @@ def calculate_B_and_G_matrices(file_name):
     count_dihedral = num_bonds + num_angles -1
     old_dihedral = ""
     for element in grad_dihedral0_cartesian.keys():
-        print("element: ",element)
-        print("grad_dihedral0_cartesian[element]: ",grad_dihedral0_cartesian[element])
+        # print("element: ",element)
+        # print("grad_dihedral0_cartesian[element]: ",grad_dihedral0_cartesian[element])
         atom_number = int(element[15])
-        print("atom_number: ",atom_number)
+        # print("atom_number: ",atom_number)
         dihedral = element[1:12]
-        print("dihedral: ",dihedral)
+        # print("dihedral: ",dihedral)
         if dihedral != old_dihedral:
             count_dihedral += 1
         B[count_dihedral][(3 * atom_number) - 3] = grad_dihedral0_cartesian[element][0]
@@ -99,18 +99,71 @@ def calculate_B_and_G_matrices(file_name):
         old_dihedral = dihedral
 
     
-    print(B)
-        
+    # print(B)
+    # print(B.shape)
+    #get transpose of B
+    B_transpose = np.transpose(B)
+    #print B_transpose shape
+    # print(B_transpose.shape)
 
-    # for atom in grad_r0_cartesian.keys():
-        # print("atom: ",atom)
-        # atom_number = int(atom[1:])
-        # # print("atom_number: ",atom_number)
-        # # print(grad_r0_cartesian[atom])
+    #get G matrix
+    G = np.dot(B,B_transpose)
+    # print(G)
+
+    #diagonalize G matrix
+    eigenvalues, eigenvectors = np.linalg.eig(G)
+    eigenvalues_sorted = np.sort(eigenvalues)
+
+    
+    
+    #filter out eigenvalues that are close to zero
+    for i in range(len(eigenvalues_sorted)):
+        if eigenvalues_sorted[i] < 1e-8:
+            eigenvalues_sorted[i] = 0
+    # print (eigenvalues_sorted)
+
+    #remove zero eigenvalues
+    # eigenvalues_sorted = eigenvalues_sorted[eigenvalues_sorted != 0]
+
+    #remove imaginary part of the eigenvalues
+    eigenvalues_sorted = np.real(eigenvalues_sorted)
+    #change order of eigenvalues, from largest to smallest
+    # eigenvalues_sorted = eigenvalues_sorted[::-1]
+
+    #put eigenvalues in a diagonal matrix
+    D = np.diag(eigenvalues_sorted)
+    # print(D)
+    #get the inverse of D by replacing the diagonal elements with their reciprocals
+
+    for i in range(len(D)):
+        if D[i][i] != 0:
+            D[i][i] = 1/D[i][i]
+
+    # print(D) #lambda-1
+
+    # print("eigenvectors: ",eigenvectors)
+    #remove imaginary part of the eigenvectors
+    eigenvectors = np.real(eigenvectors)
+    # print("eigenvectors: ",eigenvectors)
+
+    #build a matrix with the eigenvectors as columns
+    V = eigenvectors
+    # print(V.shape)
+
+    V_transpose = np.transpose(V)
+    # print(V_transpose.shape)
+
+    G_inverse = np.dot(np.dot(V_transpose,D),V)
+
+    # print(G_inverse)
+
+
+
+
+    
+
+
         
-        # B[0][atom_number - 1] = grad_r0_cartesian[atom][0]
-        # B[0][atom_number] = grad_r0_cartesian[atom][1]
-        # B[0][atom_number + 1] = grad_r0_cartesian[atom][2]
 
             
     
