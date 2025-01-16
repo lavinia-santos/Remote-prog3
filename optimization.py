@@ -42,6 +42,8 @@ def optimize_bfgs (file_name):
 
     threshold = 0.001 # to be confirmed
 
+    step_max = 0.02
+
     for k in range(1, 250):
         
         if k == 1:
@@ -60,8 +62,8 @@ def optimize_bfgs (file_name):
             atom_coords_new = {}
             sk1 = alpha * pk1_flat
             # print("sk1:",sk1)
-            if np.linalg.norm(sk1) > 0.3:
-                sk1 = sk1 * (0.3 / np.linalg.norm(sk1))
+            if np.linalg.norm(sk1) > step_max:
+                sk1 = sk1 * (step_max / np.linalg.norm(sk1))
 
             # for i in range(1, num_atoms + 1):
             #     atom_coords_new[str(i)] = atom_coords[str(i)] + sk1[3 * (i-1):3 * (i)]
@@ -74,8 +76,8 @@ def optimize_bfgs (file_name):
             for i in range(1, num_atoms + 1):   
                 step_k = alpha * pk1[i - 1] #sk = alphak * pk
                 step_k_norm = np.linalg.norm(step_k)
-                if step_k_norm > 0.3:
-                    step_k = step_k * (0.3 / step_k_norm)
+                if step_k_norm > step_max:
+                    step_k = step_k * (step_max / step_k_norm)
                 atom_coords_new[str(i)] = atom_coords[str(i)] + sk1[3 * (i-1):3 * (i)]
                 # atom_coords_new[str(i)] = atom_coords[str(i)] + step_k # r_k+1 = r_k + sk
             
@@ -108,8 +110,8 @@ def optimize_bfgs (file_name):
                 for i in range(1, num_atoms + 1):
                     step_k = alpha * pk1[i - 1] #sk = alphak * pk
                     step_k_norm = np.linalg.norm(step_k)
-                    if step_k_norm > 0.3:
-                        step_k = step_k * (0.3 / step_k_norm)
+                    if step_k_norm > step_max:
+                        step_k = step_k * (step_max / step_k_norm)
                     atom_coords_new[str(i)] = atom_coords[str(i)] + sk1[3 * (i-1):3 * (i)]
 
                     # atom_coords_new[str(i)] = atom_coords[str(i)] + step_k # r_k+1 = r_k + sk
@@ -174,8 +176,8 @@ def optimize_bfgs (file_name):
             
             sk = alpha * pk_flat
             print("sk:",sk)
-            if np.linalg.norm(sk) > 0.3:
-                sk = sk * (0.3 / np.linalg.norm(sk))
+            if np.linalg.norm(sk) > step_max:
+                sk = sk * (step_max / np.linalg.norm(sk))
             print("atom_coords_old:",atom_coords_new)
             atom_coords = atom_coords_new
             atom_coords_new = {}
@@ -186,8 +188,8 @@ def optimize_bfgs (file_name):
                 step_k = alpha * pk[i - 1] #sk = alphak * pk
                 step_k_norm = np.linalg.norm(step_k)
                 # print("step_k_norm:",step_k_norm)
-                if step_k_norm > 0.3:
-                    step_k = step_k * (0.3 / step_k_norm)
+                if step_k_norm > step_max:
+                    step_k = step_k * (step_max / step_k_norm)
                 # print("step_k:",step_k)
                 # print("atom_coords_broken:",atom_coords[str(i)])
                 # print("sk to be added:",sk[3 * (i-1):3 * (i)])
@@ -228,8 +230,9 @@ def optimize_bfgs (file_name):
                 for i in range(1, num_atoms + 1):
                         step_k = alpha * pk[i - 1] #sk = alphak * pk
                         step_k_norm = np.linalg.norm(step_k)
-                        if step_k_norm > 0.3:
-                            step_k = step_k * (0.3 / step_k_norm)
+                        if step_k_norm > step_max:
+                            print("step too big, normalizing to step_max:",step_max)
+                            step_k = step_k * (step_max / step_k_norm)
                         # atom_coords_new[str(i)] = atom_coords[str(i)] + step_k # r_k+1 = r_k + sk
                         atom_coords_new[str(i)] = atom_coords[str(i)] + sk[3 * (i-1):3 * (i)]
                 print("coords-new",atom_coords_new)
@@ -284,8 +287,8 @@ def optimize_bfgs (file_name):
                 grad_1_values = grad_k_new_values
                 E_k1 = E_k
                 Mk1 = Mk_new
-        if k == 2:
-            break
+        # if k == 2:
+        #     break
                 
 
 
@@ -297,7 +300,7 @@ def optimize_bfgs (file_name):
 
 
 
-optimize_bfgs("isobutane")
+optimize_bfgs("ethane_dist")
 
 
 
