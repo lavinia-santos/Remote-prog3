@@ -13,7 +13,7 @@ def calculate_B_and_G_matrices(file_name):
 
     _, grad_r0_cartesian = gradients.calculate_bond_stretching_gradient(file_name, atom_types, read_coordinates_from_file=True, coordinates=None)
     _, grad_angle0_cartesian = gradients.calculate_angle_bending_gradient(file_name, atom_types, read_coordinates_from_file=True, coordinates=None)
-    grad_dihedral0_cartesian = gradients.calculate_dihedral_angle_gradient(file_name,atom_coords, bonds,atom_types)
+    _, grad_dihedral0_cartesian = gradients.calculate_dihedral_angle_gradient(file_name,atom_coords, bonds,atom_types)
 
     # print(grad_r0_cartesian)
     # print("grad angles:",grad_angle0_cartesian)
@@ -62,26 +62,44 @@ def calculate_B_and_G_matrices(file_name):
 
         old_bond = bond
 
-    count_angle = num_bonds
+    count_angle = num_bonds -1
     old_angle = ""
     for element in grad_angle0_cartesian.keys():
-        print("element: ",element)
-        print("grad_angle0_cartesian[element]: ",grad_angle0_cartesian[element])
+        # print("element: ",element)
+        # print("grad_angle0_cartesian[element]: ",grad_angle0_cartesian[element])
         atom_number = int(element[12])
-        print("atom_number: ",atom_number)
+        # print("atom_number: ",atom_number)
         angle = element[1:9]
-        print("angle: ",angle)
+        # print("angle: ",angle)
         if angle != old_angle:
             count_angle += 1
         B[count_angle][(3 * atom_number) - 3] = grad_angle0_cartesian[element][0]
         B[count_angle][(3 * atom_number) - 2] = grad_angle0_cartesian[element][1]
         B[count_angle][(3 * atom_number) - 1] = grad_angle0_cartesian[element][2]
-        print("line B written: ",B[count_angle])
+        # print("line B written: ",B[count_angle])
 
         old_angle = angle
 
-    
+    count_dihedral = num_bonds + num_angles -1
+    old_dihedral = ""
+    for element in grad_dihedral0_cartesian.keys():
+        print("element: ",element)
+        print("grad_dihedral0_cartesian[element]: ",grad_dihedral0_cartesian[element])
+        atom_number = int(element[15])
+        print("atom_number: ",atom_number)
+        dihedral = element[1:12]
+        print("dihedral: ",dihedral)
+        if dihedral != old_dihedral:
+            count_dihedral += 1
+        B[count_dihedral][(3 * atom_number) - 3] = grad_dihedral0_cartesian[element][0]
+        B[count_dihedral][(3 * atom_number) - 2] = grad_dihedral0_cartesian[element][1]
+        B[count_dihedral][(3 * atom_number) - 1] = grad_dihedral0_cartesian[element][2]
+        # print("line B written: ",B[count_dihedral])
 
+        old_dihedral = dihedral
+
+    
+    print(B)
         
 
     # for atom in grad_r0_cartesian.keys():
@@ -101,6 +119,6 @@ def calculate_B_and_G_matrices(file_name):
 
 
 
-calculate_B_and_G_matrices("ethane")
+calculate_B_and_G_matrices("ethane_dist")
 
 
