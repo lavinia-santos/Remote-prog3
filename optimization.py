@@ -40,9 +40,9 @@ def optimize_bfgs (file_name):
     M = np.identity(3 * num_atoms)
     M0 = M * (1/300)  # Set the initial inverse Hessian approximation to a small value, B^-1
 
-    threshold = 0.002 # to be confirmed
+    threshold = 0.001 # to be confirmed
 
-    for k in range(1, 100):
+    for k in range(1, 250):
         
         if k == 1:
             # Bk = M0 #B0^-1
@@ -156,6 +156,7 @@ def optimize_bfgs (file_name):
                 
                 # print("yk:",yk)
                 # print("wk:",wk)
+            
 
         else:
             
@@ -265,17 +266,26 @@ def optimize_bfgs (file_name):
                 print("delta_E:",delta_E,"k:",k)
                 if np.abs(delta_E) <= threshold:
                     print("Convergence reached on k:",k)
+                    print("final energy:",E_k)
+                    print("final coordinates:",atom_coords_new)
                     break
 
 
                 Mk_new = Mk1 + ((np.dot((sk_dot_yk + yk_dot_vk),sk_x_sk))/(sk_dot_yk**2)) - ((vk_x_sk + sk_x_vk)/(sk_dot_yk))
                 print("Mk:",Mk_new)
 
+                print("atom_coords_new:",atom_coords_new)
+
+                print("step k finalized:",k)
+                   
+
                 # grad_rk1_values = grad_rk_new_values
                 grad_0_values = grad_1_values
                 grad_1_values = grad_k_new_values
                 E_k1 = E_k
                 Mk1 = Mk_new
+        if k == 2:
+            break
                 
 
 
@@ -287,7 +297,7 @@ def optimize_bfgs (file_name):
 
 
 
-optimize_bfgs("ethane_dist")
+optimize_bfgs("isobutane")
 
 
 
