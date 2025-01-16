@@ -104,7 +104,7 @@ def calculate_angle_bending_gradient(file, atom_types, read_coordinates_from_fil
     
     # Initialize gradient dictionary
     gradients = {f"{atom_types[str(i)]}{i}": np.zeros(3) for i in range(1, num_atoms + 1)}
-    
+    gradients_angles={}
     # Calculate gradient for each angle
     for angle in angles:
         atom1, atom2, atom3, angle_value = angle
@@ -127,6 +127,8 @@ def calculate_angle_bending_gradient(file, atom_types, read_coordinates_from_fil
         angle_key_4 = f"{atom1_letter}{atom3_letter}{atom2_letter}"
         angle_key_5 = f"{atom2_letter}{atom1_letter}{atom3_letter}"
         angle_key_6 = f"{atom2_letter}{atom3_letter}{atom1_letter}"
+
+        angle_key_full = f"{atom1_letter}{atom1_number}-{atom2_letter}{atom2_number}-{atom3_letter}{atom3_number}"
         
         # Get the value of k_a and θ_0 for the angle
         if angle_key_1 in ka:
@@ -206,6 +208,25 @@ def calculate_angle_bending_gradient(file, atom_types, read_coordinates_from_fil
         gradients[f"{atom_types[atom1_number]}{atom1_number}"] += gradient1
         gradients[f"{atom_types[atom3_number]}{atom3_number}"] += gradient3
 
+        dtheta_dx_atom1 = gradient1[0]
+        dtheta_dy_atom1 = gradient1[1]
+        dtheta_dz_atom1 = gradient1[2]
+
+        dtheta_dx_atom2 = gradient2[0]
+        dtheta_dy_atom2 = gradient2[1]
+        dtheta_dz_atom2 = gradient2[2]
+
+        dtheta_dx_atom3 = gradient3[0]
+        dtheta_dy_atom3 = gradient3[1]
+        dtheta_dz_atom3 = gradient3[2]
+
+        gradients_angles[f"d{angle_key_full}/d{atom1}"] = np.array([dtheta_dx_atom1, dtheta_dy_atom1, dtheta_dz_atom1])
+        gradients_angles[f"d{angle_key_full}/d{atom2}"] = np.array([dtheta_dx_atom2, dtheta_dy_atom2, dtheta_dz_atom2])
+        gradients_angles[f"d{angle_key_full}/d{atom3}"] = np.array([dtheta_dx_atom3, dtheta_dy_atom3, dtheta_dz_atom3])
+
+        # print(f"Gradient angles: {gradients_angles}")
+
+
 
 
 
@@ -213,7 +234,7 @@ def calculate_angle_bending_gradient(file, atom_types, read_coordinates_from_fil
         
         # Calculate the gradient for atom 3
         
-    return gradients
+    return gradients, gradients_angles
 
 def calculate_dihedral_angle_gradient(file,atom_coords, bonds,atom_types, read_coordinates_from_file=True, coordinates=None):
     """
@@ -435,7 +456,7 @@ def gradient_full(file, atom_types, atom_coords, bonds, num_atoms, read_coordina
     bond_stretching_gradient, _ = calculate_bond_stretching_gradient(file, atom_types, read_coordinates_from_file=read_coordinates_from_file, coordinates=coordinates)
     
     # Calculate angle bending gradient
-    angle_bending_gradient = calculate_angle_bending_gradient(file, atom_types, read_coordinates_from_file=read_coordinates_from_file, coordinates=coordinates)
+    angle_bending_gradient, _ = calculate_angle_bending_gradient(file, atom_types, read_coordinates_from_file=read_coordinates_from_file, coordinates=coordinates)
     
     # Calculate dihedral angle gradient
     dihedral_angle_gradient = calculate_dihedral_angle_gradient(file, atom_coords, bonds, atom_types, read_coordinates_from_file=read_coordinates_from_file, coordinates=coordinates)
