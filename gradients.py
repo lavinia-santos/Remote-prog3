@@ -20,13 +20,14 @@ def calculate_bond_stretching_gradient(file, atom_types, read_coordinates_from_f
     num_atoms, num_bonds, num_atom_types, atom_coords, bonds, _ = read_input(file, dev=True)
     if read_coordinates_from_file == False:
         atom_coords = coordinates 
+    # print("bonds: ",bonds)
     
     # Calculate bond lengths
     bond_lengths = bond_angles.bond_length_all(file, read_coordinates_from_file=read_coordinates_from_file, coordinates=coordinates)
     
     # Initialize gradient dictionary
     gradients = {f"{atom_types[str(i)]}{i}": np.zeros(3) for i in range(1, num_atoms + 1)}
-    
+    gradients_bonds = {}
     # Calculate gradient for each bond
     for bond in bonds:
         atom1, atom2 = str(bond[0]), str(bond[1])
@@ -34,6 +35,7 @@ def calculate_bond_stretching_gradient(file, atom_types, read_coordinates_from_f
         bond_key_number = f"{atom1}-{atom2}"
         reverse_key_number = f"{atom2}-{atom1}"
         bond_key = f"{atom_types[atom1]}{atom_types[atom2]}"
+        bond_key_full = f"{atom_types[atom1]}{atom1}-{atom_types[atom2]}{atom2}"
         reverse_key = f"{atom_types[atom2]}{atom_types[atom1]}"
         
         # Get bond length
@@ -61,8 +63,28 @@ def calculate_bond_stretching_gradient(file, atom_types, read_coordinates_from_f
         
         gradients[f"{atom_types[atom1]}{atom1}"] += force_vector
         gradients[f"{atom_types[atom2]}{atom2}"] -= force_vector
+
+        
+            
+
+        dr_dx_atom1 = (atom_coords[atom1][0] - atom_coords[atom2][0])/norm_delta_r
+        dr_dy_atom1 = (atom_coords[atom1][1] - atom_coords[atom2][1])/norm_delta_r
+        dr_dz_atom1 = (atom_coords[atom1][2] - atom_coords[atom2][2])/norm_delta_r
+
+        dr_dx_atom2 = (atom_coords[atom2][0] - atom_coords[atom1][0])/norm_delta_r
+        dr_dy_atom2 = (atom_coords[atom2][1] - atom_coords[atom1][1])/norm_delta_r
+        dr_dz_atom2 = (atom_coords[atom2][2] - atom_coords[atom1][2])/norm_delta_r
+
+        gradients_bonds[f"dr{bond_key_full}/d{atom_types[atom1]}{atom1}"] = np.array([dr_dx_atom1, dr_dy_atom1, dr_dz_atom1])
+        gradients_bonds[f"dr{bond_key_full}/d{atom_types[atom2]}{atom2}"] = np.array([dr_dx_atom2, dr_dy_atom2, dr_dz_atom2])
+
+
+        # print(f"atom 1: {atom1}, gradient: {gradients_bonds[atom1]}")
+        # print(f"atom 2: {atom2}, gradient: {gradients_bonds[atom2]}")
+
+    # print(f"Gradients bonds: {gradients_bonds}")
     
-    return gradients
+    return gradients, gradients_bonds
 
 def calculate_angle_bending_gradient(file, atom_types, read_coordinates_from_file=True, coordinates=None):
     """
@@ -410,7 +432,7 @@ def gradient_full(file, atom_types, atom_coords, bonds, num_atoms, read_coordina
     This function calculates the full gradient of the molecule by summing all gradient contributions.
     """
     # Calculate bond stretching gradient
-    bond_stretching_gradient = calculate_bond_stretching_gradient(file, atom_types, read_coordinates_from_file=read_coordinates_from_file, coordinates=coordinates)
+    bond_stretching_gradient, _ = calculate_bond_stretching_gradient(file, atom_types, read_coordinates_from_file=read_coordinates_from_file, coordinates=coordinates)
     
     # Calculate angle bending gradient
     angle_bending_gradient = calculate_angle_bending_gradient(file, atom_types, read_coordinates_from_file=read_coordinates_from_file, coordinates=coordinates)

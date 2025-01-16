@@ -55,7 +55,7 @@ def optimize_bfgs (file_name):
             # print(M)
             # print(-np.dot(M, grad_r0_values))
 
-            alpha = 1.0
+            alpha = 0.8
             
 
             # Update the coordinates of the atoms
