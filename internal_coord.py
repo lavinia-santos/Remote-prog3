@@ -252,7 +252,7 @@ def cartesian_to_internal(file_name, read_coordinates_from_file=True, coordinate
     for bond in bond_lengths:
         internal_coords.append(bond_lengths[bond])
     for angle in angles:
-        internal_coords.append(np.deg2rad(angle[3]))
+        internal_coords.append(angle[3])
     for torsion in torsion_angles.values():
         torsion = np.deg2rad(torsion)
         print(torsion)
@@ -263,7 +263,7 @@ def cartesian_to_internal(file_name, read_coordinates_from_file=True, coordinate
     # print(internal_coords)
 
     #print length of internal_coords
-    print(len(internal_coords))
+    # print(len(internal_coords))
 
     internal_coords = np.array(internal_coords)
 
