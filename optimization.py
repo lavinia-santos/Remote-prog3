@@ -334,34 +334,83 @@ def optimize_bfgs_internal (file_name):
 
     M0 = np.diag(M0_array)
     #print each line of the matrix with the line number in front of it
-    for i in range(len(M0)):
-        print(i+1,M0[i])
+    # for i in range(len(M0)):
+    #     print(i+1,M0[i])
+
+    threshold = 0.001 # to be confirmed
+
+    step_max = 0.02
+
+    nq = num_bonds + num_angles + num_dihedrals
+    nq = int(nq)
 
 
 
 
 
-    for k in range(1, 3):
+    for k in range(1, 2):
         
-        grad_cartesian = grad0
-        grad_cartesian_values = grad_0_values
-        grad_cartesian_values_flat = grad_0_values_flat
-        # print("grad_cartesian_values_flat:",grad_cartesian_values_flat)
+        if k == 1:
+            grad0_cartesian = grad0
+            grad0_cartesian_values = grad_0_values
+            grad0_cartesian_values_flat = grad_0_values_flat
+            # print("grad_cartesian_values_flat:",grad_cartesian_values_flat)
 
-        # #print grad_cartesian_values_flat shape
-        # print("grad_cartesian_values_flat shape:",grad_cartesian_values_flat.shape)
+            # #print grad_cartesian_values_flat shape
+            # print("grad_cartesian_values_flat shape:",grad_cartesian_values_flat.shape)
 
-        # print("grad_cartesian_values:",grad_cartesian_values)
+            # print("grad_cartesian_values:",grad_cartesian_values)
 
-        B, G_inverse = internal_coord.calculate_B_and_G_matrices(file_name)
-        # print("B:",B)
-        # print("G_inverse:",G_inverse)
-        #print shapes
-        # print("B shape:",B.shape)
-        # print("G_inverse shape:",G_inverse.shape)
+            B, G_inverse = internal_coord.calculate_B_and_G_matrices(file_name)
+            # print("B:",B)
+            # print("G_inverse:",G_inverse)
+            #print shapes
+            # print("B shape:",B.shape)
+            # print("G_inverse shape:",G_inverse.shape)
 
-        grad_internal = np.dot(np.dot(G_inverse,B),grad_cartesian_values_flat)
-        # print("grad_internal:",grad_internal)
+            grad0_internal = np.dot(np.dot(G_inverse,B),grad0_cartesian_values_flat)
+            # print("grad_internal:",grad_internal)
+
+            pk1 = -np.dot(M0, grad0_internal)
+            pk1_flat = pk1.flatten()
+
+            alpha = 1.0
+
+            atom_coords_new = {}
+
+            sk1 = alpha * pk1_flat
+            print("sk1:",sk1)
+
+            average_length = np.sqrt((sum([x**2 for x in sk1]))/nq)
+            print("average_length:",average_length)
+
+            if average_length > step_max:
+                sk1 = sk1 * (step_max / average_length)
+                print("sk1 after rescaling:",sk1)
+
+            
+
+
+
+            # for i in range(1, num_atoms + 1):   
+            #     step_k = alpha * pk1[i - 1] #sk = alphak * pk
+            #     # print("step_k:",step_k)
+            #     average_length = np.sqrt((sum([x**2 for x in step_k]))/nq)
+            #     print("average_length:",average_length)
+                # step_k_norm = np.linalg.norm(step_k)
+                # #checking if the step per atom is too big, this is the only reason
+                # #step_k is evaluate individually
+                # if step_k_norm > step_max:
+                #     print("step too big,",step_k_norm," normalizing to step_max:",step_max)
+                #     step_k = step_k * (step_max / step_k_norm)
+                #     print("step_k after rescaling:",step_k)
+                # #step is actually given to the coordinates from the flatten sk1 vector
+                # atom_coords_new[str(i)] = atom_coords[str(i)] + sk1[3 * (i-1):3 * (i)]
+                # atom_coords_new[str(i)] = atom_coords[str(i)] + step_k # r_k+1 = r_k + sk
+            
+
+        else:
+            print("k is not 1, i is:",k)
 
 
 
