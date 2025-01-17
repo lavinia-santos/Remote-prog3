@@ -7,7 +7,7 @@ import bond_angles
 import internal_coord
 
 
-def optimize_bfgs (file_name):
+def optimize_bfgs_cartesian (file_name):
     """
     This function is used for optimizing the geometry of a molecule using the BFGS algorithm.
     It reads the input file, calculates the gradient, and updates the coordinates of the atoms.
@@ -63,6 +63,7 @@ def optimize_bfgs (file_name):
             atom_coords_new = {}
             sk1 = alpha * pk1_flat
             # print("sk1:",sk1)
+            #checking if the full step is too big
             if np.linalg.norm(sk1) > step_max:
                 sk1 = sk1 * (step_max / np.linalg.norm(sk1))
 
@@ -73,12 +74,15 @@ def optimize_bfgs (file_name):
             
             # print ("wk:",wk)
 
-
+            #giving the step
             for i in range(1, num_atoms + 1):   
                 step_k = alpha * pk1[i - 1] #sk = alphak * pk
                 step_k_norm = np.linalg.norm(step_k)
+                #checking if the step per atom is too big, this is the only reason
+                #step_k is evaluate individually
                 if step_k_norm > step_max:
                     step_k = step_k * (step_max / step_k_norm)
+                #step is actually given to the coordinates from the flatten sk1 vector
                 atom_coords_new[str(i)] = atom_coords[str(i)] + sk1[3 * (i-1):3 * (i)]
                 # atom_coords_new[str(i)] = atom_coords[str(i)] + step_k # r_k+1 = r_k + sk
             
@@ -91,10 +95,10 @@ def optimize_bfgs (file_name):
             E_k1 = energies.total_energy(file_name, atom_types, read_coordinates_from_file=False, coordinates=atom_coords_new)
             # print("E_k:",E_k1)
 
-
+            #line search
             #check wolfe condition
             c1 = 0.1
-
+            
             while E_k1 > E0 + (c1 * alpha * np.dot(pk1_flat,grad_0_values_flat)):
                 print("Wolfe condition not satisfied")
                 alpha = alpha * 0.8
@@ -292,7 +296,7 @@ def optimize_bfgs (file_name):
         #     break
                 
 
-def optimize_internal (file_name):
+def optimize_bfgs_internal (file_name):
 
     # Read the input file
     num_atoms, num_bonds, num_atom_types, atom_coords, bonds, atom_types = reading.read_input(file_name)
@@ -304,6 +308,38 @@ def optimize_internal (file_name):
     E0 = energies.total_energy(file_name, atom_types)
 
     grad_0_values_flat = grad_0_values.flatten()
+
+    #get number of bond lengths
+    num_bonds = len(bonds)
+    # print("num bonds: ",num_bonds)
+
+    #get number of angles
+    num_angles = len(bond_angles.calculate_angles_from_bonds(atom_coords, bonds, atom_types))
+    # print("num angles: ",num_angles)
+
+    #get number of dihedrals
+    torsion_angles, chains = bond_angles.calculate_torsion_angle(atom_coords, bonds, atom_types)
+    num_dihedrals = len(torsion_angles)/2
+    num_dihedrals = int(num_dihedrals)
+
+    #build an array 
+    M0_array = []
+
+    for element in range(num_bonds):
+        M0_array.append((1/600))
+    for element in range(num_angles):
+        M0_array.append((1/150))
+    for element in range(num_dihedrals):
+        M0_array.append((1/80))
+
+    M0 = np.diag(M0_array)
+    #print each line of the matrix with the line number in front of it
+    for i in range(len(M0)):
+        print(i+1,M0[i])
+
+
+
+
 
     for k in range(1, 3):
         
@@ -325,7 +361,7 @@ def optimize_internal (file_name):
         # print("G_inverse shape:",G_inverse.shape)
 
         grad_internal = np.dot(np.dot(G_inverse,B),grad_cartesian_values_flat)
-        print("grad_internal:",grad_internal)
+        # print("grad_internal:",grad_internal)
 
 
 
@@ -343,7 +379,7 @@ def optimize_internal (file_name):
 
 
 # optimize_bfgs("ethane_dist")
-optimize_internal("ethane_dist")
+optimize_bfgs_internal("ethane_dist")
 
 
 
