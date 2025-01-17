@@ -228,7 +228,51 @@ def calculate_B_and_G_matrices(file_name):
 
 
 
+def cartesian_to_internal(file_name, read_coordinates_from_file=True, coordinates=None):
+    num_atoms, num_bonds, num_atom_types, atom_coords, bonds, atom_types = reading.read_input(file_name)
 
+    if not read_coordinates_from_file:
+        atom_coords = coordinates
+
+    bond_lengths, _ = bond_angles.bond_length_all(file_name, read_coordinates_from_file=True, coordinates=None, print_bond_length=False, check_bonds=False, print_dict=False)
+    # print(bond_lengths)
+
+    
+    angles = bond_angles.calculate_angles_from_bonds(atom_coords, bonds, atom_types)
+    
+    # print(angles)
+
+    
+    torsion_angles, chains = bond_angles.calculate_torsion_angle(atom_coords, bonds, atom_types)
+    
+    # print(torsion_angles.values())
+
+    #build an array with internal coordinates
+    internal_coords = []
+    for bond in bond_lengths:
+        internal_coords.append(bond_lengths[bond])
+    for angle in angles:
+        internal_coords.append(np.deg2rad(angle[3]))
+    for torsion in torsion_angles.values():
+        torsion = np.deg2rad(torsion)
+        print(torsion)
+        # print("internal_coords until now:",internal_coords)
+        if torsion not in internal_coords:
+            # print("appending torsion")
+            internal_coords.append(torsion)
+    # print(internal_coords)
+
+    #print length of internal_coords
+    print(len(internal_coords))
+
+    internal_coords = np.array(internal_coords)
+
+    return internal_coords
+
+
+
+
+    
 
     
 
@@ -242,6 +286,8 @@ def calculate_B_and_G_matrices(file_name):
 
 
 
-calculate_B_and_G_matrices("ethane_dist")
+# calculate_B_and_G_matrices("ethane_dist")
+
+cartesian_to_internal("ethane_dist")
 
 

@@ -304,6 +304,11 @@ def optimize_bfgs_internal (file_name):
     grad0 = gradients.gradient_full(file_name, atom_types, atom_coords, bonds, num_atoms)
     grad_0_values = np.array(list(grad0.values()))
 
+    # print("atom_coords: ", atom_coords) 
+
+    atom_coords_internal = internal_coord.cartesian_to_internal(file_name)
+    print("atom_coords_internal:",atom_coords_internal)
+
     #calculates initial energy
     E0 = energies.total_energy(file_name, atom_types)
 
@@ -376,37 +381,42 @@ def optimize_bfgs_internal (file_name):
 
             alpha = 1.0
 
-            atom_coords_new = {}
+            atom_coords_new_internal = []
 
             sk1 = alpha * pk1_flat
-            print("sk1:",sk1)
+            # print("sk1:",sk1)
 
             average_length = np.sqrt((sum([x**2 for x in sk1]))/nq)
-            print("average_length:",average_length)
+            # print("average_length:",average_length)
 
             if average_length > step_max:
                 sk1 = sk1 * (step_max / average_length)
-                print("sk1 after rescaling:",sk1)
+                # print("sk1 after rescaling:",sk1)
+            print("sk1 shape:",sk1.shape)
+            #print atom_coord_internal shape
+            print("atom_coords_internal shape:",atom_coords_internal.shape)
+
+            #print each element of sk1
+            for i in range(len(sk1)):
+                print("sk1 element:",sk1[i])
+
+            #update coordinates
+
+            for i in range(1, len(atom_coords_internal) + 1):
+                # print("i:",i)   
+                print("atom_coords_internal[i] before:",atom_coords_internal[i-1])
+                atom_coords_new_internal.append(atom_coords_internal[i-1] + sk1[i-1])
+                # print("atom_coords_internal[i] after:",atom_coords_new_internal[i-1])
+            
+            print("atom_coords_new_internal:",atom_coords_new_internal)
+
+            #step 5 non trivial step
+            #convert atom_coords_new_internal to cartesian
 
             
 
 
 
-            # for i in range(1, num_atoms + 1):   
-            #     step_k = alpha * pk1[i - 1] #sk = alphak * pk
-            #     # print("step_k:",step_k)
-            #     average_length = np.sqrt((sum([x**2 for x in step_k]))/nq)
-            #     print("average_length:",average_length)
-                # step_k_norm = np.linalg.norm(step_k)
-                # #checking if the step per atom is too big, this is the only reason
-                # #step_k is evaluate individually
-                # if step_k_norm > step_max:
-                #     print("step too big,",step_k_norm," normalizing to step_max:",step_max)
-                #     step_k = step_k * (step_max / step_k_norm)
-                #     print("step_k after rescaling:",step_k)
-                # #step is actually given to the coordinates from the flatten sk1 vector
-                # atom_coords_new[str(i)] = atom_coords[str(i)] + sk1[3 * (i-1):3 * (i)]
-                # atom_coords_new[str(i)] = atom_coords[str(i)] + step_k # r_k+1 = r_k + sk
             
 
         else:
