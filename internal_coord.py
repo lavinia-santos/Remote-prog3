@@ -142,7 +142,7 @@ def calculate_B_and_G_matrices(file_name):
     #change order of eigenvalues, from largest to smallest
     # eigenvalues_sorted = eigenvalues_sorted[::-1]
     # print("eigenvalues: ",eigenvalues_sorted)
-    print("eigenvalues: ",eigenvalues)
+    # print("eigenvalues: ",eigenvalues)
 
     #count number of eigenvalues that are close to zero
     count = 0
@@ -200,9 +200,11 @@ def calculate_B_and_G_matrices(file_name):
 
     # print(G_inverse)
 
-    for i in range(len(G_inverse)):
-        print("line number: ",i+1)
-        print(G_inverse[i])
+    # for i in range(len(G_inverse)):
+    #     print("line number: ",i+1)
+    #     print(G_inverse[i])
+
+    return B, G_inverse
 
 
 
