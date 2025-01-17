@@ -99,7 +99,13 @@ def calculate_B_and_G_matrices(file_name):
         old_dihedral = dihedral
 
     
-    # print(B)
+    #print each line of B separately and the respective line number 
+    # for i in range(len(B)):
+    #     print("line number: ",i+1)
+    #     print(B[i])
+
+
+
     # print(B.shape)
     #get transpose of B
     B_transpose = np.transpose(B)
@@ -109,41 +115,78 @@ def calculate_B_and_G_matrices(file_name):
     #get G matrix
     G = np.dot(B,B_transpose)
     # print(G)
+    #print each line of G separately and the respective line number
+    # for i in range(len(G)):
+    #     print("line number: ",i+1)
+    #     print(G[i])
 
     #diagonalize G matrix
     eigenvalues, eigenvectors = np.linalg.eig(G)
     eigenvalues_sorted = np.sort(eigenvalues)
+    eigenvectors_sorted = eigenvectors[:,eigenvalues.argsort()]
 
     
     
     #filter out eigenvalues that are close to zero
-    for i in range(len(eigenvalues_sorted)):
-        if eigenvalues_sorted[i] < 1e-8:
-            eigenvalues_sorted[i] = 0
-    # print (eigenvalues_sorted)
+    # for i in range(len(eigenvalues_sorted)):
+    #     if eigenvalues_sorted[i] < 1e-8:
+    #         eigenvalues_sorted[i] = 0
+    
 
     #remove zero eigenvalues
     # eigenvalues_sorted = eigenvalues_sorted[eigenvalues_sorted != 0]
 
     #remove imaginary part of the eigenvalues
     eigenvalues_sorted = np.real(eigenvalues_sorted)
+    eigenvalues = np.real(eigenvalues)
     #change order of eigenvalues, from largest to smallest
     # eigenvalues_sorted = eigenvalues_sorted[::-1]
+    # print("eigenvalues: ",eigenvalues_sorted)
+    print("eigenvalues: ",eigenvalues)
+
+    #count number of eigenvalues that are close to zero
+    count = 0
+    for i in range(len(eigenvalues_sorted)):
+        if eigenvalues_sorted[i] < 1e-8:
+            count += 1
+
+    #remove values that are close to zero
+    # eigenvalues_sorted = eigenvalues_sorted[eigenvalues_sorted > 1e-8]
+
+    # #add zeros to the end of the array
+    # for i in range(count):
+    #     eigenvalues_sorted = np.append(eigenvalues_sorted,0)
+
+
+
+
+    # print (eigenvalues_sorted)
 
     #put eigenvalues in a diagonal matrix
-    D = np.diag(eigenvalues_sorted)
+    D = np.diag(eigenvalues)
+    # for i in range(len(D)):
+    #     print("line number: ",i+1)
+    #     print(D[i])
+    
     # print(D)
     #get the inverse of D by replacing the diagonal elements with their reciprocals
 
     for i in range(len(D)):
-        if D[i][i] != 0:
+        if D[i][i] >= 1e-8:
             D[i][i] = 1/D[i][i]
+
+    #print each line of D separately and the respective line number
+    # for i in range(len(D)):
+    #     print("line number: ",i+1)
+    #     print(D[i])
+
 
     # print(D) #lambda-1
 
     # print("eigenvectors: ",eigenvectors)
     #remove imaginary part of the eigenvectors
     eigenvectors = np.real(eigenvectors)
+    eigenvectors_sorted = np.real(eigenvectors_sorted)
     # print("eigenvectors: ",eigenvectors)
 
     #build a matrix with the eigenvectors as columns
@@ -153,9 +196,34 @@ def calculate_B_and_G_matrices(file_name):
     V_transpose = np.transpose(V)
     # print(V_transpose.shape)
 
-    G_inverse = np.dot(np.dot(V_transpose,D),V)
+    G_inverse = np.dot(np.dot(V,D),V_transpose)
 
     # print(G_inverse)
+
+    for i in range(len(G_inverse)):
+        print("line number: ",i+1)
+        print(G_inverse[i])
+
+
+
+
+
+
+
+
+
+    G_inv = np.linalg.inv(G)
+    # print(G_inv)
+
+    #print each line of G_inv separately and the respective line number
+    # for i in range(len(G_inv)):
+    #     print("line number: ",i+1)
+    #     print(G_inv[i])
+
+    #create dummy matrix
+
+
+
 
 
 
