@@ -234,7 +234,7 @@ def cartesian_to_internal(file_name, read_coordinates_from_file=True, coordinate
     if not read_coordinates_from_file:
         atom_coords = coordinates
 
-    bond_lengths, _ = bond_angles.bond_length_all(file_name, read_coordinates_from_file=True, coordinates=None, print_bond_length=False, check_bonds=False, print_dict=False)
+    bond_lengths, _ = bond_angles.bond_length_all(file_name, read_coordinates_from_file=read_coordinates_from_file, coordinates=coordinates, print_bond_length=False, check_bonds=False, print_dict=False)
     # print(bond_lengths)
 
     
