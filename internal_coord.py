@@ -6,14 +6,17 @@ import reading
 import bond_angles
 
 
-def calculate_B_and_G_matrices(file_name):
+def calculate_B_and_G_matrices(file_name, read_coordinates_from_file=True, coordinates=None):
     
     
     num_atoms, num_bonds, num_atom_types, atom_coords, bonds, atom_types = reading.read_input(file_name)
 
-    _, grad_r0_cartesian = gradients.calculate_bond_stretching_gradient(file_name, atom_types, read_coordinates_from_file=True, coordinates=None)
-    _, grad_angle0_cartesian = gradients.calculate_angle_bending_gradient(file_name, atom_types, read_coordinates_from_file=True, coordinates=None)
-    _, grad_dihedral0_cartesian = gradients.calculate_dihedral_angle_gradient(file_name,atom_coords, bonds,atom_types)
+    if not read_coordinates_from_file:
+        atom_coords = coordinates
+
+    _, grad_r0_cartesian = gradients.calculate_bond_stretching_gradient(file_name, atom_types, read_coordinates_from_file=read_coordinates_from_file, coordinates=coordinates)
+    _, grad_angle0_cartesian = gradients.calculate_angle_bending_gradient(file_name, atom_types, read_coordinates_from_file=read_coordinates_from_file, coordinates=coordinates)
+    _, grad_dihedral0_cartesian = gradients.calculate_dihedral_angle_gradient(file_name,atom_coords, bonds,atom_types, read_coordinates_from_file=read_coordinates_from_file, coordinates=coordinates)
 
     # print(grad_r0_cartesian)
     # print("grad angles:",grad_angle0_cartesian)
@@ -235,17 +238,17 @@ def cartesian_to_internal(file_name, read_coordinates_from_file=True, coordinate
         atom_coords = coordinates
 
     bond_lengths, _ = bond_angles.bond_length_all(file_name, read_coordinates_from_file=read_coordinates_from_file, coordinates=coordinates, print_bond_length=False, check_bonds=False, print_dict=False)
-    # print(bond_lengths)
+    # print("bonds",bond_lengths)
 
     
     angles = bond_angles.calculate_angles_from_bonds(atom_coords, bonds, atom_types)
     
-    # print(angles)
+    # print("angles",angles)
 
     
     torsion_angles, chains = bond_angles.calculate_torsion_angle(atom_coords, bonds, atom_types)
     
-    # print(torsion_angles.values())
+    # print("dihedrals:",torsion_angles.values())
 
     #build an array with internal coordinates
     internal_coords = []
@@ -255,7 +258,7 @@ def cartesian_to_internal(file_name, read_coordinates_from_file=True, coordinate
         internal_coords.append(angle[3])
     for torsion in torsion_angles.values():
         torsion = np.deg2rad(torsion)
-        print(torsion)
+        # print(torsion)
         # print("internal_coords until now:",internal_coords)
         if torsion not in internal_coords:
             # print("appending torsion")

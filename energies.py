@@ -51,7 +51,7 @@ def calculate_bond_stretching_energy(file, atom_types, read_coordinates_from_fil
         # Calculate energy
         energy = k_bond * (r - r_eq) ** 2
         bond_stretching_energies[bond_key] = energy
-        print(energy)
+        # print(energy)
         energies.append(energy)
         if print_energies:
             print(f"kbond= {k_bond} Bond {bond_key}: Length = {r:.3f}, Energy = {energy:.3f} kcal/mol")
@@ -149,7 +149,7 @@ def calculate_torsion_energy(file, atom_types, print_energies=False, read_coordi
     parameters = read_parameters()
     Aphi = parameters['Aphi']
     Aphi = float(Aphi)
-    print(Aphi)
+    # print(Aphi)
     n = 3
     energies=[]
     num_atoms, num_bonds, num_atom_types, atom_coords, bonds, _ = read_input(file, dev=True)

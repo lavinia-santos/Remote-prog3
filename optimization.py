@@ -297,6 +297,22 @@ def optimize_bfgs_cartesian (file_name):
         #     break
                 
 
+def truncate_significant_digits(value, digits):
+    if value == 0:
+        return 0
+    scale = 10 ** (digits - 1 - math.floor(math.log10(abs(value))))
+    truncated_value = int(value * scale) / scale
+    return truncated_value
+
+
+def normalizar_angulo(radianos):
+    # Reduz o ângulo para o intervalo [0, 2π)
+    radianos = radianos % (360)
+    # Ajusta para o intervalo [-π, π]
+    if radianos > 180:
+        radianos -= 360
+    return radianos
+
 def optimize_bfgs_internal (file_name):
 
     # Read the input file
@@ -354,12 +370,12 @@ def optimize_bfgs_internal (file_name):
 
 
 
-    for k in range(1, 4):
+    for k in range(1, 2):
         
         if k == 1:
             grad0_cartesian = grad0
             grad0_cartesian_values = grad_0_values
-            grad0_cartesian_values_flat = grad_0_values_flat
+            grad0_cartesian_values_flat = grad_0_values_flat #g_x,k
             """# print("grad_cartesian_values_flat:",grad_cartesian_values_flat)
 
             # #print grad_cartesian_values_flat shape
@@ -367,33 +383,36 @@ def optimize_bfgs_internal (file_name):
 
             # print("grad_cartesian_values:",grad_cartesian_values)"""
 
-            B, G_inverse = internal_coord.calculate_B_and_G_matrices(file_name)
+            B, G_inverse = internal_coord.calculate_B_and_G_matrices(file_name) #B_k, G-_k 
             """# print("B:",B)
             # print("G_inverse:",G_inverse)
             #print shapes
             # print("B shape:",B.shape)
             # print("G_inverse shape:",G_inverse.shape)"""
 
-            grad0_internal = np.dot(np.dot(G_inverse,B),grad0_cartesian_values_flat)
+            grad0_internal = np.dot(np.dot(G_inverse,B),grad0_cartesian_values_flat) #g_q,k
             # print("grad_internal:",grad_internal)
 
             pk1 = -np.dot(M0, grad0_internal)
-            pk1_flat = pk1.flatten()
+            pk1_flat = pk1.flatten() #p_k,q
 
             alpha = 1.0
 
-            atom_coords_current_internal = np.array(atom_coords_internal0.copy())
-            atom_coords_new_internal = []
+            atom_coords_pevious_internal = np.array(atom_coords_internal0.copy()) #q_k
+            atom_coords_new_internal = [] 
+            atom_coords_desired_internal = [] #q_k+1
 
-            sk1 = alpha * pk1_flat
-            # print("sk1:",sk1)
+            sk1 = alpha * pk1_flat #s_q,k = s_k (internal)
+            print("Predicted update step in internal coordinates s_k (prior to possible scaling):\n",sk1)
 
-            average_length = np.sqrt((sum([x**2 for x in sk1]))/nq)
+            average_length = np.sqrt((sum([x**2 for x in sk1]))/nq) #l_q,k
             # print("average_length:",average_length)
+
+
 
             if average_length > step_max:
                 sk1 = sk1 * (step_max / average_length)
-                print("sk1 after rescaling:",sk1)
+                print("Scaled update step in internal coordinates s_k:\n",sk1)
             """# print("sk1 shape:",sk1.shape)
             #print atom_coord_internal shape
             # print("atom_coords_internal shape:",atom_coords_internal.shape)
@@ -404,104 +423,257 @@ def optimize_bfgs_internal (file_name):
             # print("sk1 after rescaling:",sk1)"""
 
             #update coordinates
-
+            #q_k+1 = q_k + s_q,k
             for i in range(1, len(atom_coords_internal0) + 1):
                 # atom_coords_current_internal.append(atom_coords_internal0[i-1]) #before step
-                atom_coords_new_internal.append(atom_coords_current_internal[i-1] + sk1[i-1]) #after step
-                print("i:",i)   
-                """print("atom_coords_internal[i] before:",atom_coords_current_internal[i-1])
+                atom_coords_desired_internal.append(atom_coords_pevious_internal[i-1] + sk1[i-1]) #after step
+                # q_k+1            =                          q_k +                      s_q,k
+                
+                """print("i:",i)   
+                print("atom_coords_internal[i] before:",atom_coords_current_internal[i-1])
                 print("atom_coords_internal[i] after:",atom_coords_new_internal[i-1])
             print("atom_coords_current_internal:",atom_coords_current_internal) #q_k+1^0
             print("atom_coords_new_internal:",atom_coords_new_internal) #q_k+1^j+1"""
-
+            
+            ##desired internal coordinates = atom_coords_desired_internal##
+            
+            
+            ############
             #starting step 5 - non trivial step
             #convert atom_coords_new_internal to cartesian
             #iteratively, i.e., in a for loop from step c and beyond
+            ############
+            s0 = atom_coords_desired_internal - atom_coords_pevious_internal
+            for i in range((num_bonds+num_angles),len(s0)+1):
+                s0[i-1] = normalizar_angulo(s0[i-1])
 
-            s0 = sk1 #a
+            # for i in range(1, len(atom_coords_internal0) + 1):
+            #     s0.append(atom_coords_desired_internal[i-1] - atom_coords_pevious_internal[i-1])
+                # s_q,k^0     =      q_k+1             -           q_k
 
-            #define initial guess for cartesian coordinates as the the previous one
-            atom_coords_previous_cartesian = atom_coords.copy() #b
-            atom_coords_new_cartesian = atom_coords_previous_cartesian.copy()
+            # s0 = sk1 #a // s_q,k^0 = q_k+1 - q_k // not needed to be calculated again here, it is already the sk1
 
-            print("atom_coords_previous_cartesian:",atom_coords_previous_cartesian)
+            #define initial guess for cartesian coordinates as the the previous one // b
+            atom_coords_previous_cartesian = atom_coords.copy()
+            atom_coords_new_cartesian = {}
+            #   x_k+1 ^0                        =     x_0
+            #only for k = 1
+
+            # atom_coords_new_cartesian = atom_coords_previous_cartesian.copy() #x_k+1^0 = x_k
+            # #   x_k+1 ^ 0                  =     x_k
+            
+            
+            
+            # print("atom_coords_previous_cartesian:",atom_coords_previous_cartesian)
 
             threshold_cartesian = 0.00001
 
-            #insert for here with a number max of steps
-            for steps_internal_to_cartesian in range(1, 6): #iterating - c
-
-                B_transpose = np.transpose(B) 
-                dx = np.dot(np.dot(B_transpose,G_inverse),s0)
-                print("dx:",dx)
-                # print("dx shape:",dx.shape)
-                # print("atom_coords_new_cartesian:",atom_coords_new_cartesian)
+            B0, G_inverse0 = internal_coord.calculate_B_and_G_matrices(file_name,read_coordinates_from_file=False,coordinates=atom_coords_previous_cartesian) #B_k, G-_k 
                 
-                for atom in atom_coords_new_cartesian.keys(): #update cartesian coordinates - c
-                    atom = int(atom)
-                    """# print("atom:",atom)
-                    # print("atom_coords_new_cartesian[atom] before:",atom_coords_previous_cartesian[str(atom)])
-                    # print("dx positions:",3 * (atom - 1),"to",3 * atom)
-                    # print("dx values:",dx[3 * (atom - 1):3 * atom])"""
-                    atom_coords_new_cartesian[str(atom)] = atom_coords_new_cartesian[str(atom)] + dx[3 * (atom - 1):3 * atom] #c
-                    # print("atom_coords_new_cartesian[atom] after:",atom_coords_new_cartesian[str(atom)])
+            B0_transpose = np.transpose(B0) 
 
-                """# print("out of for atom_coords_previous_cartesian.keys(): loop")
-                # print("atom_coords_previous_cartesian:",atom_coords_previous_cartesian)
-                #print new cartesian coordinates
-                # print("atom_coords_new_cartesian:",atom_coords_new_cartesian)
-                #evaluate new internals
-                # print("atom_coords_previous_internal:",atom_coords_new_internal)"""
+            dx = np.dot(np.dot(B0_transpose,G_inverse0),s0) # dx = B^T * G- * sk
+            # print("G inverse:\n",G_inverse0)
+            #round dx to 4 decimal places
+            # dx = np.round(dx,4)
+            print("Initially predicted dx = BTG-sk:\n",dx)
 
 
-                print("atom_coords_new_cartesian:",atom_coords_new_cartesian)
-                atom_coords_new_internal = internal_coord.cartesian_to_internal(file_name, read_coordinates_from_file=False, coordinates=atom_coords_new_cartesian) # converting new cartesian structure to internal coordinates - d
-                """## print("atom_coords_current_internal:",atom_coords_current_internal)
-                # #print corresponding cartesian coordinates
-                # # print("atom_coords_new_cartesian:",atom_coords_new_cartesian) 
-                # # 
-                # # print("atom_coords_previous_cartesian:",atom_coords_previous_cartesian)
-                # # print("atom_coords_new_cartesian:",atom_coords_new_cartesian)
-                # print("atom_coords_current_internal:",atom_coords_current_internal)
-                # print("atom_coords_new_internal:",atom_coords_new_internal)"""
-                # #evaluate new step
-                print("atom_coords_current_internal:",atom_coords_current_internal)
-                print("atom_coords_new_internal:",atom_coords_new_internal)
-                s0 = atom_coords_current_internal - atom_coords_new_internal # new step - e
-                # s0 = -s0
-                print("s0:",s0)
 
-                delta_x_full = []
-
-                for atom in atom_coords_new_cartesian.keys(): #see the difference from previous to current cartesian structure
-                    """# print("atom:",atom)
-                    # print("atom_coords_new_cartesian[atom]:",atom_coords_new_cartesian[str(atom)])
-                    # print("atom_coords_previous_cartesian[atom]:",atom_coords_previous_cartesian[str(atom)])"""
-                    delta_x = atom_coords_new_cartesian[str(atom)] - atom_coords_previous_cartesian[str(atom)]
-                    delta_x_full.append(delta_x)
-                    """#add each elment separately of delta_x to delta_x_full
-                    # for element in delta_x:
-                    #     delta_x_full.append(element)
+            for steps_internal_to_cartesian in range(1, 6): #iterating j - c
+                
+                if steps_internal_to_cartesian == 1:
+                
+                
+                    for atom in atom_coords_previous_cartesian.keys(): #update cartesian coordinates - c
+                        #updating x_k+1^(j+1) = x_k+1^j + dx
+                        atom = int(atom)
+                        """print("atom:",atom)
+                        print("atom_coords_new_cartesian[atom] before:",atom_coords_previous_cartesian[str(atom)])
+                        # print("dx positions:",3 * (atom - 1),"to",3 * atom)
+                        # print("dx values:",dx[3 * (atom - 1):3 * atom])"""
+                        atom_coords_new_cartesian[str(atom)] = atom_coords_previous_cartesian[str(atom)] + dx[3 * (atom - 1):3 * atom] #c
+                        #x_k+1^(j+1)                         =             x_k+1^j                       +  dx
+                        #atom_coords_new_cartesian = x_k+1^(j+1)
+                        # print("atom_coords_new_cartesian[atom] after:",atom_coords_new_cartesian[str(atom)])
                     
-                    # print("delta_x:",delta_x)
-                # print("delta_x_full:",delta_x_full)"""
+                    
+                    
+                    
+                    
+                    # print("atom_coords_new_cartesian:",atom_coords_new_cartesian)
+                    """# print("out of for atom_coords_previous_cartesian.keys(): loop")
+                    # print("atom_coords_previous_cartesian:",atom_coords_previous_cartesian)
+                    #print new cartesian coordinates
+                    # print("atom_coords_new_cartesian:",atom_coords_new_cartesian)
+                    #evaluate new internals
+                    # print("atom_coords_previous_internal:",atom_coords_new_internal)
 
-                #get the absolute value of the maximum element of delta_x_full
-                delta_x_max = np.max(np.abs(delta_x_full))
-                """print("atom_coords_new_cartesian:",atom_coords_new_cartesian)
-                print("step:",steps_internal_to_cartesian)
-                print("delta_x_max:",delta_x_max)"""
+
+                    print("atom_coords_new_cartesian:",atom_coords_new_cartesian)"""
+                    #d - using x_k+1^(j+1) to calculate q_k+1^(j+1)
+                    atom_coords_new_internal = internal_coord.cartesian_to_internal(file_name, read_coordinates_from_file=False, coordinates=atom_coords_new_cartesian) # converting new cartesian structure to internal coordinates - d
+                    #round atom_coords_new_internal to 4 decimal places
+                    # atom_coords_new_internal = np.round(atom_coords_new_internal,4)
+                    #q_k+1^(j+1) = cartesin_to_internal(x_k+1^(j+1))
+                    print("Cartesian fitting iteration number:",steps_internal_to_cartesian)
+                    print("current set of internals q_(k+1)^(j+1):\n",atom_coords_new_internal)
+                    """## print("atom_coords_current_internal:",atom_coords_current_internal)
+                    # #print corresponding cartesian coordinates
+                    # # print("atom_coords_new_cartesian:",atom_coords_new_cartesian) 
+                    # # 
+                    # # print("atom_coords_previous_cartesian:",atom_coords_previous_cartesian)
+                    # # print("atom_coords_new_cartesian:",atom_coords_new_cartesian)
+                    # print("atom_coords_current_internal:",atom_coords_current_internal)
+                    # print("atom_coords_new_internal:",atom_coords_new_internal)"""
+                    # #evaluate new step
+                    # print("atom_coords_current_internal:",atom_coords_current_internal)
+                    # print("atom_coords_new_internal:",atom_coords_new_internal)
+
+                    #e - s_q,k^j+1 = q_k+1 - q_k+1^j+1
+                    s0 = atom_coords_desired_internal - atom_coords_new_internal # new step - e
+                    for i in range((num_bonds+num_angles),len(s0)+1):
+                        s0[i-1] = normalizar_angulo(s0[i-1])
+                    # s_q,k^j+1 = q_k+1               -     q_k+1^(j+1)
+                    #trunk s0 to 4 decimal places
+                    # for element in range(len(s0)):
+                    #     s0[element] = truncate_significant_digits(s0[element],4)
+
+                    print("difference between these internals (q_(k+1)^(j+1)) and the desired internals (q_k+1), s_q,k^j+1: \n",s0)
+                    
+                    # if steps_internal_to_cartesian != 1:
+                    print("Corresponding Cartesians x+k+1^j:\n",atom_coords_new_cartesian)
+
+                        #f - check convergence
+                    delta_x_full = []
+                    for atom in atom_coords_new_cartesian.keys(): #see the difference from previous to current cartesian structure
+                        """# print("atom:",atom)
+                            # print("atom_coords_new_cartesian[atom]:",atom_coords_new_cartesian[str(atom)])
+                            # print("atom_coords_previous_cartesian[atom]:",atom_coords_previous_cartesian[str(atom)])"""
+                        delta_x = atom_coords_new_cartesian[str(atom)] - atom_coords_previous_cartesian[str(atom)]
+                        delta_x_full.append(delta_x)
+                        """#add each elment separately of delta_x to delta_x_full
+                        # for element in delta_x:
+                        #     delta_x_full.append(element)
+                        
+                        # print("delta_x:",delta_x)
+                    # print("delta_x_full:",delta_x_full)"""
+
+                    #get the absolute value of the maximum element of delta_x_full
+                    delta_x_max = np.max(np.abs(delta_x_full))
+                    print("Maximum change in x from previous iteration",delta_x_max)
+                    """print("atom_coords_new_cartesian:",atom_coords_new_cartesian)
+                        print("step:",steps_internal_to_cartesian)
+                        print("delta_x_max:",delta_x_max)"""
+                    
+                    if delta_x_max <= threshold_cartesian:
+                        print("Convergence reached on internal step:",steps_internal_to_cartesian)
+                        print("atom_coords_previous_cartesian:",atom_coords_previous_cartesian)  
+                        print("atom_coords_new_cartesian converged:",atom_coords_new_cartesian)
+                        print("atom_coords_new_internal:",atom_coords_new_internal)
+                        break
+                else:
+                    B, G_inverse = internal_coord.calculate_B_and_G_matrices(file_name,read_coordinates_from_file=False,coordinates=atom_coords_previous_cartesian) #B_k, G-_k 
                 
-                if delta_x_max <= threshold_cartesian:
-                    print("Convergence reached on internal step:",steps_internal_to_cartesian)
-                    print("atom_coords_previous_cartesian:",atom_coords_previous_cartesian)  
-                    print("atom_coords_new_cartesian converged:",atom_coords_new_cartesian)
-                    print("atom_coords_new_internal:",atom_coords_new_internal)
-                    break
+                    B_transpose = np.transpose(B) 
+                    dx1 = np.dot(np.dot(B_transpose,G_inverse),s0) # dx = B^T * G- * sk
+                    # print("G inverse:\n",G_inverse0)
+                    #round dx to 4 decimal places
+                    # dx = np.round(dx,4)
+                    print("dx = BTG-sk:\n",dx1)
+                    """# print("dx:",dx)
+                    # print("dx shape:",dx.shape)
+                    # print("atom_coords_new_cartesian:",atom_coords_new_cartesian)"""
 
-                #if convergence not met yet, update atom_coords_previous_cartesian
-                # atom_coords_previous_cartesian = atom_coords_new_cartesian.copy()
-                # atom_coords_current_internal = atom_coords_new_internal.copy()
+                    #if convergence not met yet, update atom_coords_previous_cartesian
+                    # atom_coords_previous_cartesian = atom_coords_new_cartesian.copy()
+                    # atom_coords_current_internal = atom_coords_new_internal.copy()
+
+                    for atom in atom_coords_previous_cartesian.keys(): #update cartesian coordinates - c
+                        #updating x_k+1^(j+1) = x_k+1^j + dx
+                        atom = int(atom)
+                        """print("atom:",atom)
+                        print("atom_coords_new_cartesian[atom] before:",atom_coords_previous_cartesian[str(atom)])
+                        # print("dx positions:",3 * (atom - 1),"to",3 * atom)
+                        # print("dx values:",dx[3 * (atom - 1):3 * atom])"""
+                        atom_coords_new_cartesian[str(atom)] = atom_coords_previous_cartesian[str(atom)] + dx1[3 * (atom - 1):3 * atom] #c
+                        #x_k+1^(j+1)                         =             x_k+1^j                       +  dx
+                        #atom_coords_new_cartesian = x_k+1^(j+1)
+                        # print("atom_coords_new_cartesian[atom] after:",atom_coords_new_cartesian[str(atom)])
+                    
+                    
+                    
+                    
+                    
+                    # print("atom_coords_new_cartesian:",atom_coords_new_cartesian)
+                    """# print("out of for atom_coords_previous_cartesian.keys(): loop")
+                    # print("atom_coords_previous_cartesian:",atom_coords_previous_cartesian)
+                    #print new cartesian coordinates
+                    # print("atom_coords_new_cartesian:",atom_coords_new_cartesian)
+                    #evaluate new internals
+                    # print("atom_coords_previous_internal:",atom_coords_new_internal)
+
+
+                    print("atom_coords_new_cartesian:",atom_coords_new_cartesian)"""
+                    #d - using x_k+1^(j+1) to calculate q_k+1^(j+1)
+                    atom_coords_new_internal = internal_coord.cartesian_to_internal(file_name, read_coordinates_from_file=False, coordinates=atom_coords_new_cartesian) # converting new cartesian structure to internal coordinates - d
+                    #round atom_coords_new_internal to 4 decimal places
+                    atom_coords_new_internal = np.round(atom_coords_new_internal,4)
+                    #q_k+1^(j+1) = cartesin_to_internal(x_k+1^(j+1))
+                    print("Cartesian fitting iteration number:",steps_internal_to_cartesian)
+                    print("current set of internals q_(k+1)^(j+1):\n",atom_coords_new_internal)
+                    """## print("atom_coords_current_internal:",atom_coords_current_internal)
+                    # #print corresponding cartesian coordinates
+                    # # print("atom_coords_new_cartesian:",atom_coords_new_cartesian) 
+                    # # 
+                    # # print("atom_coords_previous_cartesian:",atom_coords_previous_cartesian)
+                    # # print("atom_coords_new_cartesian:",atom_coords_new_cartesian)
+                    # print("atom_coords_current_internal:",atom_coords_current_internal)
+                    # print("atom_coords_new_internal:",atom_coords_new_internal)"""
+                    # #evaluate new step
+                    # print("atom_coords_current_internal:",atom_coords_current_internal)
+                    # print("atom_coords_new_internal:",atom_coords_new_internal)
+
+                    #e - s_q,k^j+1 = q_k+1 - q_k+1^j+1
+                    s0 = atom_coords_desired_internal - atom_coords_new_internal # new step - e
+                    # s_q,k^j+1 = q_k+1               -     q_k+1^(j+1)
+                    #trunk s0 to 4 decimal places
+                    # for element in range(len(s0)):
+                    #     s0[element] = truncate_significant_digits(s0[element],4)
+
+                    print("difference between these internals (q_(k+1)^(j+1)) and the desired internals (q_k+1), s_q,k^j+1: \n",s0)
+                    
+                    # if steps_internal_to_cartesian != 1:
+                    print("Corresponding Cartesians x+k+1^j:\n",atom_coords_new_cartesian)
+
+                        #f - check convergence
+                    delta_x_full = []
+                    for atom in atom_coords_new_cartesian.keys(): #see the difference from previous to current cartesian structure
+                        """# print("atom:",atom)
+                            # print("atom_coords_new_cartesian[atom]:",atom_coords_new_cartesian[str(atom)])
+                            # print("atom_coords_previous_cartesian[atom]:",atom_coords_previous_cartesian[str(atom)])"""
+                        delta_x = atom_coords_new_cartesian[str(atom)] - atom_coords_previous_cartesian[str(atom)]
+                        delta_x_full.append(delta_x)
+                        """#add each elment separately of delta_x to delta_x_full
+                        # for element in delta_x:
+                        #     delta_x_full.append(element)
+                        
+                        # print("delta_x:",delta_x)
+                    # print("delta_x_full:",delta_x_full)"""
+
+                    #get the absolute value of the maximum element of delta_x_full
+                    delta_x_max = np.max(np.abs(delta_x_full))
+                    print("Maximum change in x from previous iteration",delta_x_max)
+                    """print("atom_coords_new_cartesian:",atom_coords_new_cartesian)
+                        print("step:",steps_internal_to_cartesian)
+                        print("delta_x_max:",delta_x_max)"""
+                    
+                    if delta_x_max <= threshold_cartesian:
+                        print("Convergence reached on internal step:",steps_internal_to_cartesian)
+                        print("atom_coords_previous_cartesian:",atom_coords_previous_cartesian)  
+                        print("atom_coords_new_cartesian converged:",atom_coords_new_cartesian)
+                        print("atom_coords_new_internal:",atom_coords_new_internal)
+                        break
         
 
 
@@ -587,6 +759,7 @@ def optimize_bfgs_internal (file_name):
                 atom_coords_new_internal = internal_coord.cartesian_to_internal(file_name, read_coordinates_from_file=False, coordinates=atom_coords_new_cartesian)
 
                 s0 = atom_coords_current_internal - atom_coords_new_internal
+
                 # s0 = -s0
 
                 delta_x_full = []
