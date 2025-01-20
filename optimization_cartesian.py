@@ -299,4 +299,4 @@ def optimize_bfgs_cartesian (file_name):
 
 
 
-    
+optimize_bfgs_cartesian("methane")
