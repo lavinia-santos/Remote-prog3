@@ -52,10 +52,22 @@ def calculate_B_and_G_matrices(file_name, read_coordinates_from_file=True, coord
 
     for element in grad_r0_cartesian.keys():
         # print("element: ",element)
+        length = len(element)
+        # print("length: ",length)
         # print("grad_r0_cartesian[element]: ",grad_r0_cartesian[element])
-        atom_number = int(element[10])
-        # print("atom_number: ",atom_number)
-        bond = element[2:7]
+        if length == 11:
+            atom_number = int(element[10])
+            # print("atom_number: ",atom_number)
+            bond = element[2:7]
+        elif length == 12:
+            atom_number = int(element[11])
+            # print("atom_number: ",atom_number)
+            bond = element[2:8]
+        elif length == 13:
+            #concatenates elements 11 and 12
+            atom_number = int(element[11:13])
+            # print("atom_number: ",atom_number)
+            bond = element[2:9]
         # print("bond: ",bond)
         if bond != old_bond:
             count_bond += 1        
@@ -68,12 +80,21 @@ def calculate_B_and_G_matrices(file_name, read_coordinates_from_file=True, coord
     count_angle = num_bonds -1
     old_angle = ""
     for element in grad_angle0_cartesian.keys():
+        length = len(element)
         # print("element: ",element)
+        # print("length: ",length)
         # print("grad_angle0_cartesian[element]: ",grad_angle0_cartesian[element])
-        atom_number = int(element[12])
+        if length == 13:
+            atom_number = int(element[12])
         # print("atom_number: ",atom_number)
-        angle = element[1:9]
+            angle = element[1:9]
         # print("angle: ",angle)
+        elif length == 14:
+            atom_number = int(element[13])
+            angle = element[1:10]
+        elif length == 15:
+            atom_number = int(element[13:15])
+            angle = element[1:10]
         if angle != old_angle:
             count_angle += 1
         B[count_angle][(3 * atom_number) - 3] = grad_angle0_cartesian[element][0]
@@ -87,7 +108,10 @@ def calculate_B_and_G_matrices(file_name, read_coordinates_from_file=True, coord
     old_dihedral = ""
     for element in grad_dihedral0_cartesian.keys():
         # print("element: ",element)
+        length = len(element)
+        # print("length: ",length)
         # print("grad_dihedral0_cartesian[element]: ",grad_dihedral0_cartesian[element])
+        # if 
         atom_number = int(element[15])
         # print("atom_number: ",atom_number)
         dihedral = element[1:12]
@@ -228,7 +252,7 @@ def calculate_B_and_G_matrices(file_name, read_coordinates_from_file=True, coord
     #create dummy matrix
 
 
-
+calculate_B_and_G_matrices("ethane")
 
 
 def cartesian_to_internal(file_name, read_coordinates_from_file=True, coordinates=None):
