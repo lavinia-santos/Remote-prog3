@@ -51,79 +51,130 @@ def calculate_B_and_G_matrices(file_name, read_coordinates_from_file=True, coord
     old_bond = ""
 
     for element in grad_r0_cartesian.keys():
-        # print("element: ",element)
-        length = len(element)
-        # print("length: ",length)
-        # print("grad_r0_cartesian[element]: ",grad_r0_cartesian[element])
-        if length == 11:
-            atom_number = int(element[10])
-            # print("atom_number: ",atom_number)
-            bond = element[2:7]
-        elif length == 12:
-            atom_number = int(element[11])
-            # print("atom_number: ",atom_number)
-            bond = element[2:8]
-        elif length == 13:
-            #concatenates elements 11 and 12
-            atom_number = int(element[11:13])
-            # print("atom_number: ",atom_number)
-            bond = element[2:9]
-        # print("bond: ",bond)
+        # print("element: ", element)
+        
+        # Divida o elemento em partes com base no caractere "/"
+        parts = element.split("/")
+        # print("parts: ", parts)
+        
+        # A parte depois da última barra
+        last_part = parts[-1]
+        # print("last_part: ", last_part)
+        
+        # Extraia apenas os números do último segmento
+        atom_number_str = ''.join(filter(str.isdigit, last_part))
+        
+        if atom_number_str.isdigit():
+            atom_number = int(atom_number_str)
+            # print("atom_number: ", atom_number)
+        else:
+            # print("Nenhum número encontrado no último segmento.")
+            continue
+        
+        # O bond é a parte antes da barra
+        bond = parts[0]
+        # print("bond: ", bond)
+        
+        # Incrementa o contador de bonds se o bond for novo
         if bond != old_bond:
-            count_bond += 1        
+            count_bond += 1
+        
+        # Atualize a matriz B com os valores apropriados
         B[count_bond][(3 * atom_number) - 3] = grad_r0_cartesian[element][0]
         B[count_bond][(3 * atom_number) - 2] = grad_r0_cartesian[element][1]
         B[count_bond][(3 * atom_number) - 1] = grad_r0_cartesian[element][2]
-
+        
+        # print("Linha B escrita: ", B[count_bond])
+        
+        # Atualize o bond antigo
         old_bond = bond
 
-    count_angle = num_bonds -1
-    old_angle = ""
-    for element in grad_angle0_cartesian.keys():
-        length = len(element)
-        # print("element: ",element)
-        # print("length: ",length)
-        # print("grad_angle0_cartesian[element]: ",grad_angle0_cartesian[element])
-        if length == 13:
-            atom_number = int(element[12])
-        # print("atom_number: ",atom_number)
-            angle = element[1:9]
-        # print("angle: ",angle)
-        elif length == 14:
-            atom_number = int(element[13])
-            angle = element[1:10]
-        elif length == 15:
-            atom_number = int(element[13:15])
-            angle = element[1:10]
-        if angle != old_angle:
-            count_angle += 1
-        B[count_angle][(3 * atom_number) - 3] = grad_angle0_cartesian[element][0]
-        B[count_angle][(3 * atom_number) - 2] = grad_angle0_cartesian[element][1]
-        B[count_angle][(3 * atom_number) - 1] = grad_angle0_cartesian[element][2]
-        # print("line B written: ",B[count_angle])
 
-        old_angle = angle
+        count_angle = num_bonds - 1
+        old_angle = ""
 
-    count_dihedral = num_bonds + num_angles -1
+        for element in grad_angle0_cartesian.keys():
+            # print("element: ", element)
+            
+            # Divida o elemento em partes com base no caractere "/"
+            parts = element.split("/")
+            # print("parts: ", parts)
+            
+            # A parte depois da última barra
+            last_part = parts[-1]
+            # print("last_part: ", last_part)
+            
+            # Extraia apenas os números do último segmento
+            atom_number_str = ''.join(filter(str.isdigit, last_part))
+            
+            if atom_number_str.isdigit():
+                atom_number = int(atom_number_str)
+                # print("atom_number: ", atom_number)
+            else:
+                # print("Nenhum número encontrado no último segmento.")
+                continue
+            
+            # O ângulo é a parte antes da barra
+            angle = parts[0]
+            # print("angle: ", angle)
+            
+            # Incrementa o contador de ângulos se o ângulo for novo
+            if angle != old_angle:
+                count_angle += 1
+            
+            # Atualize a matriz B com os valores apropriados
+            B[count_angle][(3 * atom_number) - 3] = grad_angle0_cartesian[element][0]
+            B[count_angle][(3 * atom_number) - 2] = grad_angle0_cartesian[element][1]
+            B[count_angle][(3 * atom_number) - 1] = grad_angle0_cartesian[element][2]
+            
+            # print("Linha B escrita: ", B[count_angle])
+            
+            # Atualize o ângulo antigo
+            old_angle = angle
+
+
+    count_dihedral = num_bonds + num_angles - 1
     old_dihedral = ""
+
     for element in grad_dihedral0_cartesian.keys():
-        # print("element: ",element)
-        length = len(element)
-        # print("length: ",length)
-        # print("grad_dihedral0_cartesian[element]: ",grad_dihedral0_cartesian[element])
-        # if 
-        atom_number = int(element[15])
-        # print("atom_number: ",atom_number)
-        dihedral = element[1:12]
-        # print("dihedral: ",dihedral)
+        # print("element: ", eleme;nt)
+        
+        # Divida o elemento em partes com base no caractere "/"
+        parts = element.split("/")
+        # print("parts: ", parts)
+        
+        # A parte depois da última barra
+        last_part = parts[-1]
+        # print("last_part: ", last_part)
+        
+        # Extraia apenas os números do último segmento
+        atom_number_str = ''.join(filter(str.isdigit, last_part))
+        
+        if atom_number_str.isdigit():
+            atom_number = int(atom_number_str)
+            # print("atom_number: ", atom_number)
+        else:
+            # print("Nenhum número encontrado no último segmento.")
+            continue
+        
+        # O dihedral é a parte antes da barra
+        dihedral = parts[0]
+        # print("dihedral: ", dihedra/l)
+        
+        # Incrementa o contador de dihedrais se o dihedral for novo
         if dihedral != old_dihedral:
             count_dihedral += 1
+        
+        # Atualize a matriz B com os valores apropriados
         B[count_dihedral][(3 * atom_number) - 3] = grad_dihedral0_cartesian[element][0]
         B[count_dihedral][(3 * atom_number) - 2] = grad_dihedral0_cartesian[element][1]
         B[count_dihedral][(3 * atom_number) - 1] = grad_dihedral0_cartesian[element][2]
-        # print("line B written: ",B[count_dihedral])
-
+        
+        # print("Linha B escrita: ", B[count_dihedral])
+        
+        # Atualize o dihedral antigo
         old_dihedral = dihedral
+
 
     
     #print each line of B separately and the respective line number 
@@ -241,18 +292,10 @@ def calculate_B_and_G_matrices(file_name, read_coordinates_from_file=True, coord
 
 
 
-    G_inv = np.linalg.inv(G)
-    # print(G_inv)
-
-    #print each line of G_inv separately and the respective line number
-    # for i in range(len(G_inv)):
-    #     print("line number: ",i+1)
-    #     print(G_inv[i])
-
-    #create dummy matrix
+calculate_B_and_G_matrices("nbutane")
 
 
-calculate_B_and_G_matrices("ethane")
+# calculate_B_and_G_matrices("ethane")
 
 
 def cartesian_to_internal(file_name, read_coordinates_from_file=True, coordinates=None):
@@ -315,6 +358,6 @@ def cartesian_to_internal(file_name, read_coordinates_from_file=True, coordinate
 
 # calculate_B_and_G_matrices("ethane_dist")
 
-cartesian_to_internal("ethane_dist")
+cartesian_to_internal("nbutane")
 
 

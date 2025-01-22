@@ -621,7 +621,7 @@ def optimize_bfgs_internal (file_name):
 
 
 # optimize_bfgs_cartesian("methane")
-optimize_bfgs_internal("methane")
+optimize_bfgs_internal("nbutane")
 
 
 
