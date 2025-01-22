@@ -238,6 +238,7 @@ def optimize_bfgs_internal (file_name):
             
             
             sk = alpha * pk_flat
+            
 
             l_q = np.sqrt((sum([x**2 for x in sk]))/nq) #l_q,k
             if l_q > step_max:
@@ -245,8 +246,14 @@ def optimize_bfgs_internal (file_name):
 
             x_previous = x_k1_next.copy()
             x_k1_next = {}
+            print("sk:",sk)
+            print("x_previous:",x_previous)
+            
             
             for i in range(1, num_atoms + 1):   
+                # print("i:",i)
+                # print("sk[3 * (i-1):3 * (i)]:",sk[3 * (i-1):3 * (i)])
+                # print("x_previous:",x_previous[str(i)])
                 x_k1_next[str(i)] = x_previous[str(i)] + sk[3 * (i-1):3 * (i)]
 
 
@@ -337,4 +344,4 @@ def optimize_bfgs_internal (file_name):
 
 
 
-optimize_bfgs_internal("ethane_dist")
+optimize_bfgs_internal("methane")

@@ -4,6 +4,7 @@ import gradients
 import energies
 import reading
 import bond_angles
+import optimization_cartesian as opt_cartesian
 
 
 
@@ -100,3 +101,9 @@ def debug(file_name):
     print(full_gradient)
     
 
+def regular_run (file_name, more_info=False):
+    """
+    This function is used for running the whole process.
+    """
+
+    opt_cartesian.optimize_bfgs_cartesian (file_name, write_output=True, more_info=more_info)
