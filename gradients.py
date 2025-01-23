@@ -20,7 +20,6 @@ def calculate_bond_stretching_gradient(file, atom_types, read_coordinates_from_f
     num_atoms, num_bonds, num_atom_types, atom_coords, bonds, _ = read_input(file, dev=True)
     if read_coordinates_from_file == False:
         atom_coords = coordinates 
-    # print("bonds: ",bonds)
     
     # Calculate bond lengths
     bond_lengths = bond_angles.bond_length_all(file, read_coordinates_from_file=read_coordinates_from_file, coordinates=coordinates)
@@ -31,7 +30,6 @@ def calculate_bond_stretching_gradient(file, atom_types, read_coordinates_from_f
     # Calculate gradient for each bond
     for bond in bonds:
         atom1, atom2 = str(bond[0]), str(bond[1])
-        # print("atom1 bond:", atom1)
         bond_key_number = f"{atom1}-{atom2}"
         reverse_key_number = f"{atom2}-{atom1}"
         bond_key = f"{atom_types[atom1]}{atom_types[atom2]}"
@@ -78,11 +76,6 @@ def calculate_bond_stretching_gradient(file, atom_types, read_coordinates_from_f
         gradients_bonds[f"dr{bond_key_full}/d{atom_types[atom1]}{atom1}"] = np.array([dr_dx_atom1, dr_dy_atom1, dr_dz_atom1])
         gradients_bonds[f"dr{bond_key_full}/d{atom_types[atom2]}{atom2}"] = np.array([dr_dx_atom2, dr_dy_atom2, dr_dz_atom2])
 
-
-        # print(f"atom 1: {atom1}, gradient: {gradients_bonds[atom1]}")
-        # print(f"atom 2: {atom2}, gradient: {gradients_bonds[atom2]}")
-
-    # print(f"Gradients bonds: {gradients_bonds}")
     
     return gradients, gradients_bonds
 
@@ -113,12 +106,10 @@ def calculate_angle_bending_gradient(file, atom_types, read_coordinates_from_fil
         atom1_letter = str(atom1[0])
         atom2_letter = str(atom2[0])
         atom3_letter = str(atom3[0])
-        # print("atom1 angle letter:", atom1_letter)
 
         atom1_number = str(atom1[1:])
         atom2_number = str(atom2[1:])
         atom3_number = str(atom3[1:])
-        # print("atom1 angle number:", atom1_number)
         
         # Extract possible keys for the angle
         angle_key_1 = f"{atom1_letter}{atom2_letter}{atom3_letter}"
@@ -134,62 +125,34 @@ def calculate_angle_bending_gradient(file, atom_types, read_coordinates_from_fil
         if angle_key_1 in ka:
             k_angle = float(ka[angle_key_1])
             theta_eq = float(theta0[angle_key_1])
-            # print("angle_key_1:", angle_key_1) 
-            # print("k_angle:", k_angle)
-            # print("theta_eq:", theta_eq) 
         elif angle_key_2 in ka:
             k_angle = float(ka[angle_key_2])
             theta_eq = float(theta0[angle_key_2])
-            # print("angle_key_2:", angle_key_2)
-            # print("k_angle:", k_angle)
-            # print("theta_eq:", theta_eq)
         elif angle_key_3 in ka:
             k_angle = float(ka[angle_key_3])
             theta_eq = float(theta0[angle_key_3])
-            # print("angle_key_3:", angle_key_3)
-            # print("k_angle:", k_angle)
-            # print("theta_eq:", theta_eq)
         elif angle_key_4 in ka:
             k_angle = float(ka[angle_key_4])
             theta_eq = float(theta0[angle_key_4])
-            # print("angle_key_4:", angle_key_4)
-            # print("k_angle:", k_angle)
-            # print("theta_eq:", theta_eq)
         elif angle_key_5 in ka:
             k_angle = float(ka[angle_key_5])
             theta_eq = float(theta0[angle_key_5])
-            # print("angle_key_5:", angle_key_5)
-            # print("k_angle:", k_angle)
-            # print("theta_eq:", theta_eq)
         elif angle_key_6 in ka:
             k_angle = float(ka[angle_key_6])
             theta_eq = float(theta0[angle_key_6])
-            # print("angle_key_6:", angle_key_6)
-            # print("k_angle:", k_angle)
-            # print("theta_eq:", theta_eq)
         else:
             print(f"Warning: No parameters found for angle {angle_key_1}. Skipping.")
             continue
-        #calculate the gradient
-        # Calculate the gradient
+
         
         coord1 = atom_coords[atom1_number]
         coord2 = atom_coords[atom2_number]
         coord3 = atom_coords[atom3_number]
-        # print("coord1:",atom1_letter,atom1_number, coord1)
-        # print("coord2:",atom2_letter,atom2_number, coord2)
-        # print("coord3:", atom3_letter,atom3_number,coord3)
-        # if coord1 == 0 or coord2 == 0 or coord3 == 0:
-        #     print("Warning: One of the atoms has no coordinates. Stopping.")
-        #     break
-        # angle_value = np.radians(angle_value)
+
         theta_eq = np.radians(theta_eq)
-        # print("angle_value:", angle_value)
-        # print("theta_eq:", theta_eq)
-        #builde two vectors for the angle
+
         rba = np.array(coord1) - np.array(coord2)
         rbc = np.array(coord3) - np.array(coord2)
-        # rab = np.array(coord2) - np.array(coord1)
         p = np.cross(rba, rbc)
         rab2= rba**2
         rbc2= rbc**2
@@ -199,7 +162,6 @@ def calculate_angle_bending_gradient(file, atom_types, read_coordinates_from_fil
         rbc_norm = np.linalg.norm(rbc)
         rbc_norm2 = rbc_norm**2
         force = 2 * k_angle * (angle_value - theta_eq)
-        #external product of the two vectors
         p = np.cross(rba, rbc)
         gradient2 = force*((np.cross(-rba,p)/(rab_norm2 * p_norm))+(np.cross(rbc,p)/(rbc_norm2 * p_norm)))
         gradient1 = force*((np.cross(rba,p))/(rab_norm2 * p_norm))
@@ -224,15 +186,7 @@ def calculate_angle_bending_gradient(file, atom_types, read_coordinates_from_fil
         gradients_angles[f"d{angle_key_full}/d{atom2}"] = np.array([dtheta_dx_atom2, dtheta_dy_atom2, dtheta_dz_atom2])
         gradients_angles[f"d{angle_key_full}/d{atom3}"] = np.array([dtheta_dx_atom3, dtheta_dy_atom3, dtheta_dz_atom3])
 
-        # print(f"Gradient angles: {gradients_angles}")
 
-
-
-
-
-        # print(f"Atom: {atom2_letter}{atom2_number}, Gradient: {gradient2}")
-        
-        # Calculate the gradient for atom 3
         
     return gradients, gradients_angles
 
@@ -254,54 +208,33 @@ def calculate_dihedral_angle_gradient(file,atom_coords, bonds,atom_types, read_c
     n = 3
     
     torsion_angles, chains_of_four = bond_angles.calculate_torsion_angle(atom_coords, bonds, atom_types)
-    # print("Chains of four atoms:", chains_of_four)
-    # print("Torsion angles:", torsion_angles)
-    # unique_torsion_angles = list(set(torsion_angles.values()))
-    # print("Unique torsion angles:", unique_torsion_angles)
-    # Para armazenar cadeias únicas
     processed_chains = set()
 
     # Iterar pelas cadeias de quatro átomos
     for chain in chains_of_four:
-        # Normalizar a cadeia: garantir uma ordem única
-        # print("Original Chain:", chain)
         normalized_chain = tuple(sorted(chain, key=lambda x: int(x[1:])))
-        # normalized_chain = tuple(sorted(chain, key=lambda x: (x[1:], x[0])))
-        # print("Normalized chain:", normalized_chain)
-        
-        # Ignorar se já processado
         if normalized_chain in processed_chains:
             continue
         
-        # Adicionar ao conjunto de cadeias processadas
         processed_chains.add(normalized_chain)
-        # print("Processed chains:", processed_chains)
+
 
         atom1, atom2, atom3, atom4 = chain
-        # print("Calculating dihedral angle gradient for chain:", atom1, atom2, atom3, atom4)
         dihedral_key_full = f"{atom_types[str(atom1[1:])]}{atom1[1:]}-{atom_types[str(atom2[1:])]}{atom2[1:]}-{atom_types[str(atom3[1:])]}{atom3[1:]}-{atom_types[str(atom4[1:])]}{atom4[1:]}"
-        # print("Dihedral key full:", dihedral_key_full)
         
         # Coordinates of the atoms
         coord1 = atom_coords[str(atom1[1:])]
         coord2 = atom_coords[str(atom2[1:])]
         coord3 = atom_coords[str(atom3[1:])]
         coord4 = atom_coords[str(atom4[1:])]
-        # print("coord1:",atom1, coord1)
-        # print("coord2:",atom2, coord2)
-        # print("coord3:", atom3, coord3)
-        # print("coord4:", atom4, coord4)
+
 
         rab = np.array(coord2) - np.array(coord1)
         rbc = np.array(coord3) - np.array(coord2)
         rcd = np.array(coord4) - np.array(coord3)
         rac = np.array(coord3) - np.array(coord1)
         rbd = np.array(coord4) - np.array(coord2)
-        # print("rab:", rab)
-        # print("rbc:", rbc)
-        # print("rcd:", rcd)
-        # print("rac:", rac)
-        # print("rbd:", rbd)
+
 
         t = np.cross(rab, rbc)
         u = np.cross(rbc, rcd)
@@ -313,37 +246,25 @@ def calculate_dihedral_angle_gradient(file,atom_coords, bonds,atom_types, read_c
 
         phi = torsion_angles[chain]
         phi = math.radians(phi)
-        # print("phi:", phi)
         derivative = -n * Aphi * math.sin(n * phi)
         txrbc = np.cross(t,rbc)
         minusuxrbc = np.cross(-u,rbc)
         t2rbc = t_norm2 * rbc_norm
         u2rbc = u_norm2 * rbc_norm
 
-        # Calculate the gradient
-        # print("Aphi:", Aphi)
-        # print("n:", n)
-        # print("phi:", phi)
-        # print("np.sin(n * phi):", math.sin(n * phi))
-        # print("derivative:", derivative)
+
         gradient1 = derivative * np.cross(((np.cross(t,rbc))/(t_norm2 * rbc_norm)),rbc) 
         gradient4 = derivative * np.cross(((np.cross(-u,rbc))/(u_norm2*rbc_norm)),rbc)
-        # gradient2 = derivative * () + 
         
         gradient2 = derivative * ((np.cross(rac,((np.cross(t,rbc))/(t_norm2 * rbc_norm)))) + (np.cross(((np.cross(-u,rbc))/(u_norm2*rbc_norm)),rcd)))
         gradient3 = derivative * ((np.cross((txrbc/(t_norm2*rbc_norm)),rab)) + (np.cross(rbd,(minusuxrbc/(u_norm2*rbc_norm)))))
 
-        # print(f"Before update: {atom1}, Gradient1: {gradients[f'{atom1}']}")
-        # print(f"Before update: {atom2}, Gradient2: {gradients[f'{atom2}']}")
-        # print(f"Before update: {atom3}, Gradient3: {gradients[f'{atom3}']}")
-        # print(f"Before update: {atom4}, Gradient4: {gradients[f'{atom4}']}")
 
 
         gradients[f"{atom1}"] += gradient1
         gradients[f"{atom2}"] += gradient2
         gradients[f"{atom3}"] += gradient3
         gradients[f"{atom4}"] += gradient4
-        # print("Gradients:", gradients)
 
         dphi_dx_atom1 = gradient1[0]/derivative
         dphi_dy_atom1 = gradient1[1]/derivative
@@ -366,15 +287,6 @@ def calculate_dihedral_angle_gradient(file,atom_coords, bonds,atom_types, read_c
         gradients_dihedrals[f"d{dihedral_key_full}/d{atom3}"] = np.array([dphi_dx_atom3, dphi_dy_atom3, dphi_dz_atom3])
         gradients_dihedrals[f"d{dihedral_key_full}/d{atom4}"] = np.array([dphi_dx_atom4, dphi_dy_atom4, dphi_dz_atom4])
 
-        # print(f"Gradients dihedrals: {gradients_dihedrals}")
-
-
-
-
-        # print(f"After update: {atom1}, Gradient1: {gradients[f'{atom1}']}")
-        # print(f"After update: {atom2}, Gradient2: {gradients[f'{atom2}']}")
-        # print(f"After update: {atom3}, Gradient3: {gradients[f'{atom3}']}")
-        # print(f"After update: {atom4}, Gradient4: {gradients[f'{atom4}']}")
     return gradients, gradients_dihedrals
 
         
@@ -419,28 +331,22 @@ def calculate_vdw_gradient(file, atom_types, read_coordinates_from_file=True, co
             bonded_atoms[atom2] = []
         bonded_atoms[atom1].append(atom2)
         bonded_atoms[atom2].append(atom1)
-    # print (bonded_atoms)
     
     for atom in atom_coords:
         for atom2 in atom_coords:
             atom=int(atom)
             atom2=int(atom2)
-            # print("atom:", atom)
-            # print("atom2:", atom2)
+
             if atom != atom2:
                 pair = tuple(sorted([atom, atom2]))
-                # print("pair:", pair)
                 if pair not in unique_pairs:
-                    # print("pair:", pair)
-                    # print("and bonded:",bonded_atoms.get(atom, []))
+
                     if atom2 not in bonded_atoms.get(atom, []) and not any(atom2 in bonded_atoms.get(neighbor, []) for neighbor in bonded_atoms.get(atom, [])):
-                        # print(bonded_atoms.get(atom))
                         
                         unique_pairs.add(pair)
                         atom1 = str(atom)
                         atom2 = str(atom2)
                         bond_key = f"{atom_types[atom1]}{atom_types[atom2]}"
-                        # print("bond_key:", bond_key)
                         
                         if bond_key == 'HH':
                             sigma = sigma_HH
@@ -472,8 +378,7 @@ def calculate_vdw_gradient(file, atom_types, read_coordinates_from_file=True, co
                         gradientz_atom2 = (z2 - z1) * (((-12 * Aij)/r_norm**14) + ((6 * Bij)/r_norm**8))
                         gradients[f"{atom_types[atom1]}{atom1}"] += np.array([gradientx_atom1, gradienty_atom1, gradientz_atom1])
                         gradients[f"{atom_types[atom2]}{atom2}"] += np.array([gradientx_atom2, gradienty_atom2, gradientz_atom2])
-                        # print(f"Atom: {atom_types[atom1]}{atom1}, Gradient: {np.array([gradientx_atom1, gradienty_atom1, gradientz_atom1])}")
-    # print(f"Gradient:", gradients)
+
     return gradients
 
 def gradient_full(file, atom_types, atom_coords, bonds, num_atoms, read_coordinates_from_file=True, coordinates=None):
@@ -498,3 +403,4 @@ def gradient_full(file, atom_types, atom_coords, bonds, num_atoms, read_coordina
         total_gradient[atom] = bond_stretching_gradient[atom] + angle_bending_gradient[atom] + dihedral_angle_gradient[atom] + vdw_gradient[atom]
     
     return total_gradient
+

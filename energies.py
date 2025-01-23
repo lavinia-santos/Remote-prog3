@@ -14,20 +14,17 @@ def calculate_bond_stretching_energy(file, atom_types, read_coordinates_from_fil
     parameters = read_parameters()
     kb = parameters['kb']
     r0 = parameters['r0']
-    # print(kb)
     energies=[]
     # Get molecule information
     num_atoms, num_bonds, num_atom_types, atom_coords, bonds, _ = read_input(file, dev=True)
 
     # Calculate bond lengths
     bond_lengths = bond_angles.bond_length_all(file, read_coordinates_from_file=read_coordinates_from_file, coordinates=coordinates)
-    # print("Bond lengths:", bond_lengths)
 
     # Calculate bond stretching energy for each bond
     bond_stretching_energies = {}
     for bond in bonds:
         atom1, atom2 = str(bond[0]), str(bond[1])
-        # {atom_types[str(atom1)]}{atom1}
         bond_key_number = f"{str(atom1)}-{str(atom2)}"
         reverse_key_number = f"{str(atom2)}-{str(atom1)}"
         bond_key = f"{atom_types[str(atom1)]}{atom_types[str(atom2)]}"
@@ -35,7 +32,6 @@ def calculate_bond_stretching_energy(file, atom_types, read_coordinates_from_fil
 
         # Get bond length
         r = bond_lengths[0].get(bond_key_number) or bond_lengths[0].get(reverse_key_number)
-        # print(r)
 
         # Get force parameters for the bond
         if bond_key in kb:
@@ -51,7 +47,6 @@ def calculate_bond_stretching_energy(file, atom_types, read_coordinates_from_fil
         # Calculate energy
         energy = k_bond * (r - r_eq) ** 2
         bond_stretching_energies[bond_key] = energy
-        # print(energy)
         energies.append(energy)
         if print_energies:
             print(f"kbond= {k_bond} Bond {bond_key}: Length = {r:.3f}, Energy = {energy:.3f} kcal/mol")
@@ -65,11 +60,7 @@ def calculate_bond_stretching_energy(file, atom_types, read_coordinates_from_fil
 
 
 def calculate_angle_bending_energy(file, atom_types, print_energies=False, read_coordinates_from_file=True,coordinates=None):
-    """
-    Esta função calcula a energia de flexão para todos os ângulos na molécula.
-    A energia é calculada usando a fórmula: E_ângulo = ka * (θ - θ0)^2
-    """
-    # Ler parâmetros
+
     parameters = read_parameters()
     ka = parameters['ka']
     theta0 = parameters['theta0']
@@ -77,15 +68,11 @@ def calculate_angle_bending_energy(file, atom_types, print_energies=False, read_
     for key in theta0:
         theta0[key] = math.radians(float(theta0[key]))
     energies=[]
-    # print(ka)
-    # Obter informações da molécula
     num_atoms, num_bonds, num_atom_types, atom_coords, bonds, atom_types = read_input(file, dev=True)
     if read_coordinates_from_file == False:
         atom_coords = coordinates
-    # Calcular os ângulos
     angles = bond_angles.calculate_angles_from_bonds(atom_coords, bonds, atom_types)
     
-    # Calcular a energia de flexão para cada ângulo
     angle_bending_energies = {}
     for angle in angles:
         atom1, atom2, atom3, angle_value = angle
@@ -95,7 +82,6 @@ def calculate_angle_bending_energy(file, atom_types, print_energies=False, read_
         atom2_letter = atom2[0]
         atom3_letter = atom3[0]
 
-        # Extrair as possiveis chaves para o ângulo
         
         angle_key_1 = f"{atom1_letter}{atom2_letter}{atom3_letter}"
         angle_key_2 = f"{atom3_letter}{atom2_letter}{atom1_letter}"
@@ -106,7 +92,6 @@ def calculate_angle_bending_energy(file, atom_types, print_energies=False, read_
         
         
         
-        # Obter o valor de k_a e θ_0 para o ângulo
         if angle_key_1 in ka:
             k_angle = float(ka[angle_key_1])
             theta_eq = float(theta0[angle_key_1])
@@ -129,9 +114,7 @@ def calculate_angle_bending_energy(file, atom_types, print_energies=False, read_
             print(f"Warning: No parameters found for angle {angle_key_1}. Skipping.")
             continue
         
-        # Calcular a energia
-        # print("angle_value:", angle_value)
-        # print("theta_eq:", theta_eq)
+
         energy = k_angle * (angle_value - theta_eq) ** 2
         angle_bending_energies[angle_key_1] = energy
         energies.append(energy)
@@ -145,31 +128,23 @@ def calculate_angle_bending_energy(file, atom_types, print_energies=False, read_
 
 
 def calculate_torsion_energy(file, atom_types, print_energies=False, read_coordinates_from_file=True,coordinates=None):
-    # Ler parâmetros
     parameters = read_parameters()
     Aphi = parameters['Aphi']
     Aphi = float(Aphi)
-    # print(Aphi)
     n = 3
     energies=[]
     num_atoms, num_bonds, num_atom_types, atom_coords, bonds, _ = read_input(file, dev=True)
     if read_coordinates_from_file == False:
         atom_coords = coordinates
     
-    # Calcular ângulos de torção e garantir que sejam únicos
+
     torsion_angles = bond_angles.calculate_torsion_angle(atom_coords, bonds, atom_types)
-    # print("Torsion angles:", torsion_angles)
-    # Remover duplicatas
+
     unique_torsion_angles = list(set([angle for angle in torsion_angles[0].values()]))
     
-    # print("Unique torsion angles:", unique_torsion_angles)
     
     torsion_energy = {}
     for angle in unique_torsion_angles:
-        # print("Aphi:", Aphi)
-        # print("n:", n)
-        # print("angle:", angle)
-        # print("math.cos(n * angle):", math.cos(n * math.radians(angle)))
         energy = Aphi * (1 + math.cos(n * math.radians(angle)))
         torsion_energy[angle] = energy
         energies.append(energy)
@@ -190,7 +165,6 @@ def calculate_VDW_energy(file, atom_types, print_energies=False, debug=False, re
     num_atoms, num_bonds, num_atom_types, atom_coords, bonds, _ = read_input(file, dev=True)
     if read_coordinates_from_file == False:
         atom_coords = coordinates
-    # bond_lengths = bond_length_all(file)
     #get sigma H,C and epsilon H,C
     sigma_H = float(sigma_i['H'])
     epsilon_H = float(epsilon_i['H'])
@@ -221,7 +195,6 @@ def calculate_VDW_energy(file, atom_types, print_energies=False, debug=False, re
             bonded_atoms[atom2] = []
         bonded_atoms[atom1].append(atom2)
         bonded_atoms[atom2].append(atom1)
-    # print (bonded_atoms)
     
     for atom in atom_coords:
         for atom2 in atom_coords:
@@ -231,12 +204,9 @@ def calculate_VDW_energy(file, atom_types, print_energies=False, debug=False, re
                 pair = tuple(sorted([atom, atom2]))
                 if pair not in unique_pairs:
                     if atom2 not in bonded_atoms.get(atom, []) and not any(atom2 in bonded_atoms.get(neighbor, []) for neighbor in bonded_atoms.get(atom, [])):
-                        # print(bonded_atoms.get(atom))
-                        # print(pair)
                         unique_pairs.add(pair)
                         atom1 = str(atom)
                         atom2 = str(atom2)
-                        # print(f"atom_types: {atom_types}")
                         bond_key = f"{atom_types[atom1]}{atom_types[atom2]}"
                         r = np.linalg.norm(np.array(atom_coords[atom1]) - np.array(atom_coords[atom2]))
                         if bond_key == 'HH':
@@ -265,7 +235,6 @@ def total_energy(file, atom_types,read_coordinates_from_file = True,coordinates=
     This function calculates the total energy of the molecule by summing all energy contributions.
     """
     # Calculate bond stretching energies
-    # print("coordinates:", coordinates)
     bond_stretching_energies = calculate_bond_stretching_energy(file, atom_types, coordinates=coordinates,read_coordinates_from_file=read_coordinates_from_file)
     sum_bond_stretching_energy = bond_stretching_energies[1]
     

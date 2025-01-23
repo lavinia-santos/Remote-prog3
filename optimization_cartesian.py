@@ -343,14 +343,7 @@ def optimize_bfgs_cartesian (file_name, write_output = False, more_info=False):
 
 
                 Mk_new = Mk1 + ((np.dot((sk_dot_yk + yk_dot_vk),sk_x_sk))/(sk_dot_yk**2)) - ((vk_x_sk + sk_x_vk)/(sk_dot_yk))
-                # print("Mk:",Mk_new)
 
-                # print("atom_coords_new:",atom_coords_new)
-
-                # print("step k finalized:",k)
-                   
-
-                # grad_rk1_values = grad_rk_new_values
                 grad_0_values = grad_1_values
                 grad_1_values = grad_k_new_values
                 E_k1 = E_k
@@ -361,4 +354,4 @@ def optimize_bfgs_cartesian (file_name, write_output = False, more_info=False):
 
 
 
-# optimize_bfgs_cartesian("methane")
+optimize_bfgs_cartesian("nbutane")

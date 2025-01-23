@@ -99,6 +99,9 @@ def debug(file_name):
     full_gradient = gradients.gradient_full(file_name, atom_types, atom_coords, bonds, num_atoms)
     print("Full gradient:")
     print(full_gradient)
+
+    #add other parts to this function
+    #opt, etc
     
 
 def regular_run (file_name, more_info=False):
@@ -107,3 +110,4 @@ def regular_run (file_name, more_info=False):
     """
 
     opt_cartesian.optimize_bfgs_cartesian (file_name, write_output=True, more_info=more_info)
+    #also add the internal opt

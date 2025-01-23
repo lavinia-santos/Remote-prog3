@@ -18,32 +18,25 @@ def calculate_B_and_G_matrices(file_name, read_coordinates_from_file=True, coord
     _, grad_angle0_cartesian = gradients.calculate_angle_bending_gradient(file_name, atom_types, read_coordinates_from_file=read_coordinates_from_file, coordinates=coordinates)
     _, grad_dihedral0_cartesian = gradients.calculate_dihedral_angle_gradient(file_name,atom_coords, bonds,atom_types, read_coordinates_from_file=read_coordinates_from_file, coordinates=coordinates)
 
-    # print(grad_r0_cartesian)
-    # print("grad angles:",grad_angle0_cartesian)
 
     grad0_cartesian = gradients.gradient_full(file_name, atom_types, atom_coords, bonds, num_atoms)
 
     nx = 3*num_atoms
 
-    # print("bonds: ",bonds)
 
-    #get number of bond lengths
     num_bonds = len(bonds)
-    # print("num bonds: ",num_bonds)
 
-    #get number of angles
+
     num_angles = len(bond_angles.calculate_angles_from_bonds(atom_coords, bonds, atom_types))
-    # print("num angles: ",num_angles)
+
 
     #get number of dihedrals
     torsion_angles, chains = bond_angles.calculate_torsion_angle(atom_coords, bonds, atom_types)
     num_dihedrals = len(torsion_angles)/2
     num_dihedrals = int(num_dihedrals)
-    # print("num_dihedrals: ",num_dihedrals)
 
     nq = num_bonds + num_angles + num_dihedrals
     nq = int(nq)
-    # print(nq)
 
     B = np.zeros((nq,nx))
     
@@ -51,42 +44,29 @@ def calculate_B_and_G_matrices(file_name, read_coordinates_from_file=True, coord
     old_bond = ""
 
     for element in grad_r0_cartesian.keys():
-        # print("element: ", element)
-        
-        # Divida o elemento em partes com base no caractere "/"
+
         parts = element.split("/")
-        # print("parts: ", parts)
-        
-        # A parte depois da última barra
+
         last_part = parts[-1]
-        # print("last_part: ", last_part)
         
-        # Extraia apenas os números do último segmento
+
         atom_number_str = ''.join(filter(str.isdigit, last_part))
         
         if atom_number_str.isdigit():
             atom_number = int(atom_number_str)
-            # print("atom_number: ", atom_number)
         else:
-            # print("Nenhum número encontrado no último segmento.")
             continue
         
-        # O bond é a parte antes da barra
         bond = parts[0]
-        # print("bond: ", bond)
         
-        # Incrementa o contador de bonds se o bond for novo
         if bond != old_bond:
             count_bond += 1
         
-        # Atualize a matriz B com os valores apropriados
         B[count_bond][(3 * atom_number) - 3] = grad_r0_cartesian[element][0]
         B[count_bond][(3 * atom_number) - 2] = grad_r0_cartesian[element][1]
         B[count_bond][(3 * atom_number) - 1] = grad_r0_cartesian[element][2]
         
-        # print("Linha B escrita: ", B[count_bond])
         
-        # Atualize o bond antigo
         old_bond = bond
 
 
@@ -94,42 +74,33 @@ def calculate_B_and_G_matrices(file_name, read_coordinates_from_file=True, coord
         old_angle = ""
 
         for element in grad_angle0_cartesian.keys():
-            # print("element: ", element)
-            
-            # Divida o elemento em partes com base no caractere "/"
+
             parts = element.split("/")
-            # print("parts: ", parts)
-            
-            # A parte depois da última barra
+
             last_part = parts[-1]
-            # print("last_part: ", last_part)
-            
-            # Extraia apenas os números do último segmento
+
             atom_number_str = ''.join(filter(str.isdigit, last_part))
             
             if atom_number_str.isdigit():
                 atom_number = int(atom_number_str)
-                # print("atom_number: ", atom_number)
+
             else:
-                # print("Nenhum número encontrado no último segmento.")
+
                 continue
             
-            # O ângulo é a parte antes da barra
+
             angle = parts[0]
-            # print("angle: ", angle)
+
             
-            # Incrementa o contador de ângulos se o ângulo for novo
+
             if angle != old_angle:
                 count_angle += 1
             
-            # Atualize a matriz B com os valores apropriados
             B[count_angle][(3 * atom_number) - 3] = grad_angle0_cartesian[element][0]
             B[count_angle][(3 * atom_number) - 2] = grad_angle0_cartesian[element][1]
             B[count_angle][(3 * atom_number) - 1] = grad_angle0_cartesian[element][2]
             
-            # print("Linha B escrita: ", B[count_angle])
-            
-            # Atualize o ângulo antigo
+
             old_angle = angle
 
 
@@ -137,165 +108,82 @@ def calculate_B_and_G_matrices(file_name, read_coordinates_from_file=True, coord
     old_dihedral = ""
 
     for element in grad_dihedral0_cartesian.keys():
-        # print("element: ", eleme;nt)
-        
-        # Divida o elemento em partes com base no caractere "/"
+
         parts = element.split("/")
-        # print("parts: ", parts)
-        
-        # A parte depois da última barra
+
         last_part = parts[-1]
-        # print("last_part: ", last_part)
-        
-        # Extraia apenas os números do último segmento
+
         atom_number_str = ''.join(filter(str.isdigit, last_part))
         
         if atom_number_str.isdigit():
             atom_number = int(atom_number_str)
-            # print("atom_number: ", atom_number)
         else:
-            # print("Nenhum número encontrado no último segmento.")
             continue
         
-        # O dihedral é a parte antes da barra
         dihedral = parts[0]
-        # print("dihedral: ", dihedra/l)
+
         
-        # Incrementa o contador de dihedrais se o dihedral for novo
         if dihedral != old_dihedral:
             count_dihedral += 1
         
-        # Atualize a matriz B com os valores apropriados
         B[count_dihedral][(3 * atom_number) - 3] = grad_dihedral0_cartesian[element][0]
         B[count_dihedral][(3 * atom_number) - 2] = grad_dihedral0_cartesian[element][1]
         B[count_dihedral][(3 * atom_number) - 1] = grad_dihedral0_cartesian[element][2]
-        
-        # print("Linha B escrita: ", B[count_dihedral])
-        
-        # Atualize o dihedral antigo
+
         old_dihedral = dihedral
 
 
-    
-    #print each line of B separately and the respective line number 
-    # for i in range(len(B)):
-    #     print("line number: ",i+1)
-    #     print(B[i])
 
-
-
-    # print(B.shape)
-    #get transpose of B
     B_transpose = np.transpose(B)
-    #print B_transpose shape
-    # print(B_transpose.shape)
-
-    #get G matrix
     G = np.dot(B,B_transpose)
-    # print(G)
-    #print each line of G separately and the respective line number
-    # for i in range(len(G)):
-    #     print("line number: ",i+1)
-    #     print(G[i])
+    ############################ checar bem essa parte, entender o que fez, se deu sorted no eigenvalues, ou nao, etc####################   
 
-    #diagonalize G matrix
     eigenvalues, eigenvectors = np.linalg.eig(G)
     eigenvalues_sorted = np.sort(eigenvalues)
     eigenvectors_sorted = eigenvectors[:,eigenvalues.argsort()]
 
     
-    
-    #filter out eigenvalues that are close to zero
-    # for i in range(len(eigenvalues_sorted)):
-    #     if eigenvalues_sorted[i] < 1e-8:
-    #         eigenvalues_sorted[i] = 0
-    
-
-    #remove zero eigenvalues
-    # eigenvalues_sorted = eigenvalues_sorted[eigenvalues_sorted != 0]
 
     #remove imaginary part of the eigenvalues
     eigenvalues_sorted = np.real(eigenvalues_sorted)
     eigenvalues = np.real(eigenvalues)
-    #change order of eigenvalues, from largest to smallest
-    # eigenvalues_sorted = eigenvalues_sorted[::-1]
-    # print("eigenvalues: ",eigenvalues_sorted)
-    # print("eigenvalues: ",eigenvalues)
+
 
     #count number of eigenvalues that are close to zero
     count = 0
     for i in range(len(eigenvalues_sorted)):
         if eigenvalues_sorted[i] < 1e-8:
             count += 1
-
-    #remove values that are close to zero
-    # eigenvalues_sorted = eigenvalues_sorted[eigenvalues_sorted > 1e-8]
-
-    # #add zeros to the end of the array
-    # for i in range(count):
-    #     eigenvalues_sorted = np.append(eigenvalues_sorted,0)
+    #check if this part makes sense
+    #if we are using this count for anything
 
 
-
-
-    # print (eigenvalues_sorted)
-
-    #put eigenvalues in a diagonal matrix
     D = np.diag(eigenvalues)
-    # for i in range(len(D)):
-    #     print("line number: ",i+1)
-    #     print(D[i])
-    
-    # print(D)
-    #get the inverse of D by replacing the diagonal elements with their reciprocals
+
 
     for i in range(len(D)):
         if D[i][i] >= 1e-8:
             D[i][i] = 1/D[i][i]
 
-    #print each line of D separately and the respective line number
-    # for i in range(len(D)):
-    #     print("line number: ",i+1)
-    #     print(D[i])
 
-
-    # print(D) #lambda-1
-
-    # print("eigenvectors: ",eigenvectors)
-    #remove imaginary part of the eigenvectors
     eigenvectors = np.real(eigenvectors)
     eigenvectors_sorted = np.real(eigenvectors_sorted)
-    # print("eigenvectors: ",eigenvectors)
 
-    #build a matrix with the eigenvectors as columns
     V = eigenvectors
-    # print(V.shape)
 
     V_transpose = np.transpose(V)
-    # print(V_transpose.shape)
 
     G_inverse = np.dot(np.dot(V,D),V_transpose)
 
-    # print(G_inverse)
 
-    # for i in range(len(G_inverse)):
-    #     print("line number: ",i+1)
-    #     print(G_inverse[i])
 
     return B, G_inverse
-
-
-
-
-
-
 
 
 
 calculate_B_and_G_matrices("nbutane")
 
 
-# calculate_B_and_G_matrices("ethane")
 
 
 def cartesian_to_internal(file_name, read_coordinates_from_file=True, coordinates=None):
@@ -305,17 +193,17 @@ def cartesian_to_internal(file_name, read_coordinates_from_file=True, coordinate
         atom_coords = coordinates
 
     bond_lengths, _ = bond_angles.bond_length_all(file_name, read_coordinates_from_file=read_coordinates_from_file, coordinates=coordinates, print_bond_length=False, check_bonds=False, print_dict=False)
-    # print("bonds",bond_lengths)
+
 
     
     angles = bond_angles.calculate_angles_from_bonds(atom_coords, bonds, atom_types)
     
-    # print("angles",angles)
+
 
     
     torsion_angles, chains = bond_angles.calculate_torsion_angle(atom_coords, bonds, atom_types)
     
-    # print("dihedrals:",torsion_angles.values())
+
 
     #build an array with internal coordinates
     internal_coords = []
@@ -325,15 +213,10 @@ def cartesian_to_internal(file_name, read_coordinates_from_file=True, coordinate
         internal_coords.append(angle[3])
     for torsion in torsion_angles.values():
         torsion = np.deg2rad(torsion)
-        # print(torsion)
-        # print("internal_coords until now:",internal_coords)
-        if torsion not in internal_coords:
-            # print("appending torsion")
-            internal_coords.append(torsion)
-    # print(internal_coords)
 
-    #print length of internal_coords
-    # print(len(internal_coords))
+        if torsion not in internal_coords:
+            internal_coords.append(torsion)
+
 
     internal_coords = np.array(internal_coords)
 
@@ -342,21 +225,7 @@ def cartesian_to_internal(file_name, read_coordinates_from_file=True, coordinate
 
 
 
-    
 
-    
-
-
-        
-
-            
-    
-
-
-
-
-
-# calculate_B_and_G_matrices("ethane_dist")
 
 cartesian_to_internal("nbutane")
 
