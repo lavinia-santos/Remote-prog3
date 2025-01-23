@@ -63,7 +63,7 @@ def optimize_bfgs_cartesian (file_name, write_output = False, more_info=False):
 
     step_max = 0.02
 
-    for k in range(1, 250):
+    for k in range(1, 500):
         
         if k == 1:
             # Bk = M0 #B0^-1
@@ -322,8 +322,11 @@ def optimize_bfgs_cartesian (file_name, write_output = False, more_info=False):
                 sk_x_vk = np.outer(sk,vk)
 
                 delta_E = E_k - E_k1
-                # print("delta_E:",delta_E,"k:",k)
-                if np.abs(delta_E) <= threshold:
+                rms = np.sqrt(np.dot(grad_k_new_values.flatten(),grad_k_new_values.flatten())/len(grad_k_new_values.flatten()))
+                print("delta_E:",delta_E,"k:",k)
+                print("rms:",rms)
+                print("k:",k)
+                if rms <= threshold:
                     print("Convergence reached on k:",k)
                     print("final energy:",E_k)
                     print("final coordinates:",atom_coords_new)
@@ -354,4 +357,4 @@ def optimize_bfgs_cartesian (file_name, write_output = False, more_info=False):
 
 
 
-optimize_bfgs_cartesian("nbutane")
+optimize_bfgs_cartesian("cholestane_reordered")

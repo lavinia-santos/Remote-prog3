@@ -71,7 +71,7 @@ def optimize_bfgs_internal (file_name):
     nq = int(nq)
 
 
-    for k in range(1, 400):
+    for k in range(1, 5000):
         
         if k == 1:
             grad0_cartesian = grad0
@@ -220,6 +220,7 @@ def optimize_bfgs_internal (file_name):
                 delta_x_max = np.max(np.abs(delta_x_full))
                 print("Maximum change in x from previous iteration before else do while",delta_x_max)
                 E_k1 = energies.total_energy(file_name, atom_types, read_coordinates_from_file=False, coordinates=atom_coords_new_cartesian)
+            
                 # if delta_x_max <= threshold_cartesian:
                 steps_internal_to_cartesian += 1
             else:
@@ -249,7 +250,8 @@ def optimize_bfgs_internal (file_name):
                 # atom_coords_previous_cartesian = atom_coords_new_cartesian.copy()
                 # E_k1 = energies.total_energy(file_name, atom_types, read_coordinates_from_file=False, coordinates=atom_coords_new_cartesian)
                 delta_E = E_k1 - E0
-                if np.abs(delta_E) <= threshold:
+                grms = np.sqrt(np.dot(grad1_internal,grad1_internal))/len(grad1_internal)
+                if grms <= threshold:
                     print("Convergence reached on k:",k)
                     print("final energy:",E_k1)
                     print("final coordinates cartesian:",atom_coords_new_cartesian)
@@ -367,6 +369,7 @@ def optimize_bfgs_internal (file_name):
 
                 delta_x_max = np.max(np.abs(delta_x_full))
 
+
                 E_k = energies.total_energy(file_name, atom_types, read_coordinates_from_file=False, coordinates=atom_coords_new_cartesian)
 
                 steps_internal_to_cartesian += 1
@@ -392,9 +395,13 @@ def optimize_bfgs_internal (file_name):
                 # E_k = energies.total_energy(file_name, atom_types, read_coordinates_from_file=False, coordinates=atom_coords_new_cartesian)
                 print("E_k:",E_k)
                 delta_E = E_k - E_k1
-                if np.abs(delta_E) <= threshold:
+                grms = np.sqrt(np.dot(grad1_cartesian_values_flat,grad1_cartesian_values_flat)/len(grad1_cartesian_values_flat))
+                print("grms:",grms)
+                
+                if grms <= threshold:
                     print("Convergence reached on k:",k)
                     print("final energy:",E_k)
+                    print("grms:",grms)
                     print("final coordinates cartesian:",atom_coords_new_cartesian)
                     print("final coordinates internal:",atom_coords_new_internal)
                     break
@@ -407,31 +414,9 @@ def optimize_bfgs_internal (file_name):
                 
 
 
-     
 
 
-            
-
-
-
-
-
-
-
-
-            
-
-    
-
-
-
-            
-
-        
-
-
-
-optimize_bfgs_internal("nbutane")
+optimize_bfgs_internal("methane")
 
 
 
