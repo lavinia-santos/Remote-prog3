@@ -52,13 +52,24 @@ def calculate_bond_stretching_gradient(file, atom_types, read_coordinates_from_f
         
         # Calculate the gradient
         delta_r = np.array(atom_coords[atom1]) - np.array(atom_coords[atom2])
+        rba = np.array(atom_coords[atom2]) - np.array(atom_coords[atom1])
+        norm_rba = np.linalg.norm(rba)
         norm_delta_r = np.linalg.norm(delta_r)
         if norm_delta_r == 0:
             continue  # Avoid division by zero
         
         force_magnitude = 2 * k_bond * (norm_delta_r - r_eq) / norm_delta_r
         force_vector = force_magnitude * delta_r
+
+        # force = 2 * k_bond * (norm_delta_r - r_eq)
+        # gradient1 = force * (rba/norm_rba)
+        # gradient2 = force * (-rba/norm_rba)
+
+        # gradients[f"{atom_types[atom1]}{atom1}"] += gradient1
+        # gradients[f"{atom_types[atom2]}{atom2}"] += gradient2
         
+
+
         gradients[f"{atom_types[atom1]}{atom1}"] += force_vector
         gradients[f"{atom_types[atom2]}{atom2}"] -= force_vector
 

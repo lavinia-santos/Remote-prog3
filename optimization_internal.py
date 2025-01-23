@@ -71,7 +71,7 @@ def optimize_bfgs_internal (file_name):
     nq = int(nq)
 
 
-    for k in range(1, 5000):
+    for k in range(1, 2):
         
         if k == 1:
             grad0_cartesian = grad0
@@ -81,9 +81,12 @@ def optimize_bfgs_internal (file_name):
 
             B, G_inverse = internal_coord.calculate_B_and_G_matrices(file_name) #B_k, G-_k 
 
+            # print("B matrix:\n",B)
+            # print("G inverse matrix:\n",G_inverse)
+
 
             grad0_internal = np.dot(np.dot(G_inverse,B),grad0_cartesian_values_flat) #g_q,k
-            # print("grad_internal:",grad_internal)
+            # print("grad_internal:",grad0_internal)
 
             pk1 = -np.dot(M0, grad0_internal)
             pk1_flat = pk1.flatten() #p_k,q
@@ -136,7 +139,10 @@ def optimize_bfgs_internal (file_name):
             threshold_cartesian = 0.00001
 
             B0, G_inverse0 = internal_coord.calculate_B_and_G_matrices(file_name,read_coordinates_from_file=False,coordinates=atom_coords_previous_cartesian) #B_k, G-_k 
-                
+            # print("B0 matrix:\n",B0)
+            # print("G inverse matrix:\n",G_inverse0)
+
+
             B0_transpose = np.transpose(B0) 
 
             dx = np.dot(np.dot(B0_transpose,G_inverse0),s0) # dx = B^T * G- * sk
@@ -171,6 +177,10 @@ def optimize_bfgs_internal (file_name):
 
             atom_coords_previous_cartesian = atom_coords_new_cartesian.copy()
             delta_x_max = 1
+            print("\n\n iteration will start from here, current parameters are:\n")
+            print("atom_coords_previous_internal:",atom_coords_previous_internal)
+            print("atom_coords_desired_internal:",atom_coords_desired_internal)
+            print("atom_coords_new_internal:",atom_coords_new_internal)
 
             ##########################################################################################################################################
             ################################################### starting step 5 iteration - non trivial step #########################################
@@ -178,7 +188,7 @@ def optimize_bfgs_internal (file_name):
             # for steps_internal_to_cartesian in range(1, 10): #iterating j - c
             steps_internal_to_cartesian = 1
             while delta_x_max > threshold_cartesian:
-                
+                print("Starting cartesian iteration")
                 
 
                 print("\n\nCartesian fitting iteration number:\n",steps_internal_to_cartesian)
@@ -195,6 +205,9 @@ def optimize_bfgs_internal (file_name):
                 print("difference between these internals (q_(k+1)^(j)) and the desired internals (q_k+1), s_q,k^j: \n",s0)
                 #evaluate new dx
                 B, G_inverse = internal_coord.calculate_B_and_G_matrices(file_name,read_coordinates_from_file=False,coordinates=atom_coords_previous_cartesian)
+
+                
+                
                 B_transpose = np.transpose(B)
                 dx = np.dot(np.dot(B_transpose,G_inverse),s0) # dx = B^T * G- * sk
                 for atom in atom_coords_previous_cartesian.keys(): #update cartesian coordinates - c
@@ -228,6 +241,8 @@ def optimize_bfgs_internal (file_name):
                 # print("atom_coords_previous_cartesian:",atom_coords_previous_cartesian)  
                 print("atom_coords_new_cartesian converged:",atom_coords_new_cartesian)
                 print("atom_coords_new_internal:",atom_coords_new_internal)
+                print("B matrix:\n",B)
+                print("G inverse matrix:\n",G_inverse)
                 print("Calculating new Mk...")
                 
                 
@@ -235,6 +250,7 @@ def optimize_bfgs_internal (file_name):
                 grad1_cartesian_values = np.array(list(grad1_cartesian.values()))
                 grad1_cartesian_values_flat = grad1_cartesian_values.flatten()
                 grad1_internal = np.dot(np.dot(G_inverse,B),grad1_cartesian_values_flat)
+                print("grad1_internal:",grad1_internal)
                 # grad1_internal_values = np.array(list(grad1_internal.values()))
                 y_qk = grad1_internal - grad0_internal
                 v_qk = np.dot(M0,y_qk)
@@ -416,7 +432,7 @@ def optimize_bfgs_internal (file_name):
 
 
 
-optimize_bfgs_internal("methane")
+optimize_bfgs_internal("ethane")
 
 
 

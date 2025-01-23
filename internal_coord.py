@@ -183,7 +183,7 @@ def calculate_B_and_G_matrices(file_name, read_coordinates_from_file=True, coord
 
 calculate_B_and_G_matrices("nbutane")
 
-
+ 
 
 
 def cartesian_to_internal(file_name, read_coordinates_from_file=True, coordinates=None):

@@ -357,4 +357,4 @@ def optimize_bfgs_cartesian (file_name, write_output = False, more_info=False):
 
 
 
-optimize_bfgs_cartesian("cholestane_reordered")
+optimize_bfgs_cartesian("ethane_dist")
