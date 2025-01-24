@@ -28,7 +28,7 @@ def optimize_bfgs_internal (file_name):
     # print("atom_coords: ", atom_coords) 
 
     atom_coords_internal0 = internal_coord.cartesian_to_internal(file_name)
-    # print("atom_coords_internal:",atom_coords_internal0)
+    print("atom_coords_internal:",atom_coords_internal0)
 
     #calculates initial energy
     E0 = energies.total_energy(file_name, atom_types)
@@ -233,15 +233,16 @@ def optimize_bfgs_internal (file_name):
                 print("Maximum change in x from previous iteration before else do while",delta_x_max)
                 E_k1 = energies.total_energy(file_name, atom_types, read_coordinates_from_file=False, coordinates=atom_coords_new_cartesian)
 
-                atom_coords_previous_internal = atom_coords_new_internal.copy()
+                # atom_coords_previous_internal = atom_coords_new_internal.copy()
                 # atom_coords_new_cartesian = {}
+                atom_coords_previous_cartesian = atom_coords_new_cartesian.copy()
 
             
                 # if delta_x_max <= threshold_cartesian:
                 steps_internal_to_cartesian += 1
 
-                if steps_internal_to_cartesian > 3:
-                    break
+                # if steps_internal_to_cartesian > 3:
+                #     break
             else:
                 #calculate B and G inverse for the new structure
                 B, G_inverse = internal_coord.calculate_B_and_G_matrices(file_name,read_coordinates_from_file=False,coordinates=atom_coords_new_cartesian)
@@ -251,8 +252,9 @@ def optimize_bfgs_internal (file_name):
                 print("atom_coords_new_internal:",atom_coords_new_internal)
                 print("B matrix in the new strcture:\n",B)
                 print("G inverse matrix in the new strcture:\n",G_inverse)
+                # print("atom_coords_previous_internal:",atom_coords_previous_internal)
+                sk = atom_coords_new_internal - atom_coords_previous_internal
                 print("Calculating new Mk...")
-                
                 
                 grad1_cartesian = gradients.gradient_full(file_name, atom_types, atom_coords_new_cartesian, bonds, num_atoms, read_coordinates_from_file=False, coordinates=atom_coords_new_cartesian)
                 grad1_cartesian_values = np.array(list(grad1_cartesian.values()))
@@ -261,25 +263,32 @@ def optimize_bfgs_internal (file_name):
                 print("grad1_internal:",grad1_internal)
                 # grad1_internal_values = np.array(list(grad1_internal.values()))
                 y_qk = grad1_internal - grad0_internal
+                print("sk:",sk)
+                print("y_qk:",y_qk)
                 v_qk = np.dot(M0,y_qk)
-                s_qk_dot_y_qk = np.dot(s0,y_qk)
+                print("v_qk:",v_qk)
+                s_qk_dot_y_qk = np.dot(sk,y_qk)
                 y_qk_dot_v_qk = np.dot(y_qk,v_qk)
-                s_qk_x_s_qk = np.outer(s0,s0)
-                v_qk_x_s_qk = np.outer(v_qk,s0)
-                s_qk_x_v_qk = np.outer(s0,v_qk)
+                s_qk_x_s_qk = np.outer(sk,sk)
+                v_qk_x_s_qk = np.outer(v_qk,sk)
+                s_qk_x_v_qk = np.outer(sk,v_qk)
                 M1 = M0 + ((np.dot((s_qk_dot_y_qk + y_qk_dot_v_qk),s_qk_x_s_qk))/(s_qk_dot_y_qk**2)) - ((v_qk_x_s_qk + s_qk_x_v_qk)/(s_qk_dot_y_qk))
-                # print("M1:",M1)
+                print("M1:",M1)
                 # atom_coords_previous_internal = atom_coords_new_internal.copy()
                 # atom_coords_current_internal = atom_coords_new_internal.copy()
                 # atom_coords_previous_cartesian = atom_coords_new_cartesian.copy()
                 # E_k1 = energies.total_energy(file_name, atom_types, read_coordinates_from_file=False, coordinates=atom_coords_new_cartesian)
                 delta_E = E_k1 - E0
+                #print old and new energies
+                print("E_old:",E0)
+                print("E_new:",E_k1)
                 grms = np.sqrt(np.dot(grad1_internal,grad1_internal))/len(grad1_internal)
                 if grms <= threshold:
                     print("Convergence reached on k:",k)
                     print("final energy:",E_k1)
                     print("final coordinates cartesian:",atom_coords_new_cartesian)
                     print("final coordinates internal:",atom_coords_new_internal)
+                    atom_coords_previous_internal = atom_coords_new_internal.copy()
                     break
             
                 
@@ -355,6 +364,7 @@ def optimize_bfgs_internal (file_name):
             # print("s0",s0)
 
             atom_coords_previous_cartesian = atom_coords_new_cartesian.copy()
+            # atom_coords_previous_cartesian = atom_coords_new_cartesian.copy()
 
 
 
@@ -397,7 +407,7 @@ def optimize_bfgs_internal (file_name):
 
 
                 E_k = energies.total_energy(file_name, atom_types, read_coordinates_from_file=False, coordinates=atom_coords_new_cartesian)
-
+                atom_coords_previous_cartesian = atom_coords_new_cartesian.copy()
                 steps_internal_to_cartesian += 1
                 
 
@@ -408,6 +418,10 @@ def optimize_bfgs_internal (file_name):
                 print("atom_coords_previous_cartesian:",atom_coords_previous_cartesian)  
                 print("atom_coords_new_cartesian converged:",atom_coords_new_cartesian)
                 print("atom_coords_new_internal:",atom_coords_new_internal)
+                print("B matrix in the new strcture:\n",B)
+                print("G inverse matrix in the new strcture:\n",G_inverse)
+                # print("atom_coords_previous_internal:",atom_coords_previous_internal)
+                sk = atom_coords_new_internal - atom_coords_previous_internal
             
                 grad1_cartesian = gradients.gradient_full(file_name, atom_types, atom_coords_new_cartesian, bonds, num_atoms, read_coordinates_from_file=False, coordinates=atom_coords_new_cartesian)
                 grad1_cartesian_values = np.array(list(grad1_cartesian.values()))
@@ -415,13 +429,16 @@ def optimize_bfgs_internal (file_name):
                 grad1_internal = np.dot(np.dot(G_inverse,B),grad1_cartesian_values_flat)
                 y_qk = grad1_internal - grad0_internal
                 v_qk = np.dot(M1,y_qk)
-                s_qk_dot_y_qk = np.dot(s0,y_qk)
+                s_qk_dot_y_qk = np.dot(sk,y_qk)
                 y_qk_dot_v_qk = np.dot(y_qk,v_qk)
-                s_qk_x_s_qk = np.outer(s0,s0)
-                v_qk_x_s_qk = np.outer(v_qk,s0)
-                s_qk_x_v_qk = np.outer(s0,v_qk)
+                s_qk_x_s_qk = np.outer(sk,sk)
+                v_qk_x_s_qk = np.outer(v_qk,sk)
+                s_qk_x_v_qk = np.outer(sk,v_qk)
+                Mk_new = M1 + ((np.dot((s_qk_dot_y_qk + y_qk_dot_v_qk),s_qk_x_s_qk))/(s_qk_dot_y_qk**2)) - ((v_qk_x_s_qk + s_qk_x_v_qk)/(s_qk_dot_y_qk))
+
                 # E_k = energies.total_energy(file_name, atom_types, read_coordinates_from_file=False, coordinates=atom_coords_new_cartesian)
-                print("E_k:",E_k)
+                print("E_old:",E_k1)
+                print("E_new:",E_k)
                 delta_E = E_k - E_k1
                 grms = np.sqrt(np.dot(grad1_cartesian_values_flat,grad1_cartesian_values_flat)/len(grad1_cartesian_values_flat))
                 print("grms:",grms)
@@ -432,8 +449,8 @@ def optimize_bfgs_internal (file_name):
                     print("grms:",grms)
                     print("final coordinates cartesian:",atom_coords_new_cartesian)
                     print("final coordinates internal:",atom_coords_new_internal)
+                    atom_coords_previous_internal = atom_coords_new_internal.copy()
                     break
-                Mk_new = M1 + ((np.dot((s_qk_dot_y_qk + y_qk_dot_v_qk),s_qk_x_s_qk))/(s_qk_dot_y_qk**2)) - ((v_qk_x_s_qk + s_qk_x_v_qk)/(s_qk_dot_y_qk))
                 
                 # atom_coords_previous_cartesian = atom_coords_new_cartesian.copy()
                 grad0_internal = grad1_internal
