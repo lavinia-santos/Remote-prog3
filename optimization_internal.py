@@ -71,7 +71,7 @@ def optimize_bfgs_internal (file_name):
     nq = int(nq)
 
 
-    for k in range(1, 2):
+    for k in range(1, 3):
         
         if k == 1:
             grad0_cartesian = grad0
@@ -140,7 +140,7 @@ def optimize_bfgs_internal (file_name):
 
             B0, G_inverse0 = internal_coord.calculate_B_and_G_matrices(file_name,read_coordinates_from_file=False,coordinates=atom_coords_previous_cartesian) #B_k, G-_k 
             # print("B0 matrix:\n",B0)
-            # print("G inverse matrix:\n",G_inverse0)
+            # print("G0 inverse matrix:\n",G_inverse0)
 
 
             B0_transpose = np.transpose(B0) 
@@ -192,6 +192,7 @@ def optimize_bfgs_internal (file_name):
                 
 
                 print("\n\nCartesian fitting iteration number:\n",steps_internal_to_cartesian)
+                print("k:",k)
 
                 #print current set of internals
                 print("current set of internals q_(k+1)^(j):\n",atom_coords_new_internal)
@@ -204,12 +205,10 @@ def optimize_bfgs_internal (file_name):
 
                 print("difference between these internals (q_(k+1)^(j)) and the desired internals (q_k+1), s_q,k^j: \n",s0)
                 #evaluate new dx
-                B, G_inverse = internal_coord.calculate_B_and_G_matrices(file_name,read_coordinates_from_file=False,coordinates=atom_coords_previous_cartesian)
+                # B, G_inverse = internal_coord.calculate_B_and_G_matrices(file_name,read_coordinates_from_file=False,coordinates=atom_coords_previous_cartesian)
 
-                
-                
-                B_transpose = np.transpose(B)
-                dx = np.dot(np.dot(B_transpose,G_inverse),s0) # dx = B^T * G- * sk
+                dx = np.dot(np.dot(B0_transpose,G_inverse0),s0) # dx = B^T * G- * sk
+                print("predicted dx = BTG-sk:\n",dx)
                 for atom in atom_coords_previous_cartesian.keys(): #update cartesian coordinates - c
                     #updating x_k+1^(j+1) = x_k+1^j + dx
                     atom = int(atom)
@@ -233,16 +232,25 @@ def optimize_bfgs_internal (file_name):
                 delta_x_max = np.max(np.abs(delta_x_full))
                 print("Maximum change in x from previous iteration before else do while",delta_x_max)
                 E_k1 = energies.total_energy(file_name, atom_types, read_coordinates_from_file=False, coordinates=atom_coords_new_cartesian)
+
+                atom_coords_previous_internal = atom_coords_new_internal.copy()
+                # atom_coords_new_cartesian = {}
+
             
                 # if delta_x_max <= threshold_cartesian:
                 steps_internal_to_cartesian += 1
+
+                if steps_internal_to_cartesian > 3:
+                    break
             else:
+                #calculate B and G inverse for the new structure
+                B, G_inverse = internal_coord.calculate_B_and_G_matrices(file_name,read_coordinates_from_file=False,coordinates=atom_coords_new_cartesian)
                 print("Convergence reached on internal step:",steps_internal_to_cartesian)
                 # print("atom_coords_previous_cartesian:",atom_coords_previous_cartesian)  
                 print("atom_coords_new_cartesian converged:",atom_coords_new_cartesian)
                 print("atom_coords_new_internal:",atom_coords_new_internal)
-                print("B matrix:\n",B)
-                print("G inverse matrix:\n",G_inverse)
+                print("B matrix in the new strcture:\n",B)
+                print("G inverse matrix in the new strcture:\n",G_inverse)
                 print("Calculating new Mk...")
                 
                 
@@ -279,7 +287,7 @@ def optimize_bfgs_internal (file_name):
 
 
         else:
-            print("k is not 1, i is:",k)
+            print("k is not 1, it is:",k)
             # grad0_internal = grad1_internal
             # grad0_internal_values = grad1_internal_values
             # grad0_internal_values_flat = grad1_internal_values.flatten()
@@ -313,14 +321,16 @@ def optimize_bfgs_internal (file_name):
             atom_coords_previous_cartesian = atom_coords_new_cartesian.copy()
             atom_coords_new_cartesian = {}
 
-            B0, G_inverse0 = internal_coord.calculate_B_and_G_matrices(file_name,read_coordinates_from_file=False,coordinates=atom_coords_previous_cartesian)
+            # B0, G_inverse0 = internal_coord.calculate_B_and_G_matrices(file_name,read_coordinates_from_file=False,coordinates=atom_coords_previous_cartesian)
 
             threshold_cartesian = 0.00001
             
-            B0_transpose = np.transpose(B0) 
+            # B0_transpose = np.transpose(B0) 
+
+            B_transpose = np.transpose(B)
 
             #calculando primeiro dx, antes do loop de internal to cartesian
-            dx = np.dot(np.dot(B0_transpose,G_inverse0),s0) # dx = B^T * G- * sk
+            dx = np.dot(np.dot(B_transpose,G_inverse),s0) # dx = B^T * G- * sk
             # print("G inverse:\n",G_inverse0)
             
             print("Initially predicted dx = BTG-sk:\n",dx)
@@ -363,16 +373,16 @@ def optimize_bfgs_internal (file_name):
                 for i in range((num_bonds+num_angles),len(s0)+1):
                     s0[i-1] = normalize_2pi(s0[i-1])
                 
-                B, G_inverse = internal_coord.calculate_B_and_G_matrices(file_name,read_coordinates_from_file=False,coordinates=atom_coords_previous_cartesian)                
-                B_transpose = np.transpose(B) 
-                dx = np.dot(np.dot(B_transpose,G_inverse),s0)
+                # B, G_inverse = internal_coord.calculate_B_and_G_matrices(file_name,read_coordinates_from_file=False,coordinates=atom_coords_previous_cartesian)                
+                # B_transpose = np.transpose(B) 
+                dx = np.dot(np.dot(B0_transpose,G_inverse0),s0)
                 # print("dx:",dx)
                 
                 for atom in atom_coords_previous_cartesian.keys():
                     atom = int(atom)
                     atom_coords_new_cartesian[str(atom)] = atom_coords_previous_cartesian[str(atom)] + dx[3 * (atom - 1):3 * atom]
 
-                print(" JUST ADDEDCorresponding Cartesians x+k+1^j:\n",atom_coords_new_cartesian)
+                print("Corresponding Cartesians x+k+1^j:\n",atom_coords_new_cartesian)
 
                 atom_coords_new_internal = internal_coord.cartesian_to_internal(file_name, read_coordinates_from_file=False, coordinates=atom_coords_new_cartesian)
 
@@ -392,6 +402,8 @@ def optimize_bfgs_internal (file_name):
                 
 
             else:
+                #calculate B and G inverse for the new structure
+                B, G_inverse = internal_coord.calculate_B_and_G_matrices(file_name,read_coordinates_from_file=False,coordinates=atom_coords_new_cartesian)
                 print("Convergence reached on internal step:",steps_internal_to_cartesian)
                 print("atom_coords_previous_cartesian:",atom_coords_previous_cartesian)  
                 print("atom_coords_new_cartesian converged:",atom_coords_new_cartesian)

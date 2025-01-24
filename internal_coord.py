@@ -11,12 +11,12 @@ def calculate_B_and_G_matrices(file_name, read_coordinates_from_file=True, coord
     
     num_atoms, num_bonds, num_atom_types, atom_coords, bonds, atom_types = reading.read_input(file_name)
 
-    if not read_coordinates_from_file:
+    if not read_coordinates_from_file and coordinates is not None:
         atom_coords = coordinates
 
-    _, grad_r0_cartesian = gradients.calculate_bond_stretching_gradient(file_name, atom_types, read_coordinates_from_file=read_coordinates_from_file, coordinates=coordinates)
-    _, grad_angle0_cartesian = gradients.calculate_angle_bending_gradient(file_name, atom_types, read_coordinates_from_file=read_coordinates_from_file, coordinates=coordinates)
-    _, grad_dihedral0_cartesian = gradients.calculate_dihedral_angle_gradient(file_name,atom_coords, bonds,atom_types, read_coordinates_from_file=read_coordinates_from_file, coordinates=coordinates)
+    _, grad_r0_cartesian = gradients.calculate_bond_stretching_gradient(file_name, atom_types, read_coordinates_from_file=read_coordinates_from_file, coordinates=atom_coords)
+    _, grad_angle0_cartesian = gradients.calculate_angle_bending_gradient(file_name, atom_types, read_coordinates_from_file=read_coordinates_from_file, coordinates=atom_coords)
+    _, grad_dihedral0_cartesian = gradients.calculate_dihedral_angle_gradient(file_name,atom_coords, bonds,atom_types, read_coordinates_from_file=read_coordinates_from_file, coordinates=atom_coords)
 
 
     grad0_cartesian = gradients.gradient_full(file_name, atom_types, atom_coords, bonds, num_atoms)
@@ -189,10 +189,10 @@ calculate_B_and_G_matrices("nbutane")
 def cartesian_to_internal(file_name, read_coordinates_from_file=True, coordinates=None):
     num_atoms, num_bonds, num_atom_types, atom_coords, bonds, atom_types = reading.read_input(file_name)
 
-    if not read_coordinates_from_file:
+    if not read_coordinates_from_file and coordinates is not None:
         atom_coords = coordinates
 
-    bond_lengths, _ = bond_angles.bond_length_all(file_name, read_coordinates_from_file=read_coordinates_from_file, coordinates=coordinates, print_bond_length=False, check_bonds=False, print_dict=False)
+    bond_lengths, _ = bond_angles.bond_length_all(file_name, read_coordinates_from_file=read_coordinates_from_file, coordinates=atom_coords, print_bond_length=False, check_bonds=False, print_dict=False)
 
 
     
