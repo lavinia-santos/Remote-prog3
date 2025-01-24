@@ -323,6 +323,9 @@ def optimize_bfgs_cartesian (file_name, write_output = False, more_info=False):
 
                 delta_E = E_k - E_k1
                 rms = np.sqrt(np.dot(grad_k_new_values.flatten(),grad_k_new_values.flatten())/len(grad_k_new_values.flatten()))
+                print("old energy:",E_k1)
+                print("new energy:",E_k)
+
                 print("delta_E:",delta_E,"k:",k)
                 print("rms:",rms)
                 print("k:",k)
@@ -357,4 +360,4 @@ def optimize_bfgs_cartesian (file_name, write_output = False, more_info=False):
 
 
 
-optimize_bfgs_cartesian("ethane_dist")
+optimize_bfgs_cartesian("pinane")

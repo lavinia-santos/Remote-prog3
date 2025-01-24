@@ -71,7 +71,7 @@ def optimize_bfgs_internal (file_name):
     nq = int(nq)
 
 
-    for k in range(1, 50):
+    for k in range(1, 500):
         
         if k == 1:
             grad0_cartesian = grad0
@@ -488,7 +488,7 @@ def optimize_bfgs_internal (file_name):
 
 
 
-optimize_bfgs_internal("ethane")
+optimize_bfgs_internal("cholestane")
 
 
 
