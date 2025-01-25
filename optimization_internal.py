@@ -488,7 +488,7 @@ def optimize_bfgs_internal (file_name):
 
 
 
-optimize_bfgs_internal("cholestane")
+optimize_bfgs_internal("ethane_dist")
 
 
 

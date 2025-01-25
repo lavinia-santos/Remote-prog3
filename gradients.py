@@ -219,15 +219,28 @@ def calculate_dihedral_angle_gradient(file,atom_coords, bonds,atom_types, read_c
     n = 3
     
     torsion_angles, chains_of_four = bond_angles.calculate_torsion_angle(atom_coords, bonds, atom_types)
-    processed_chains = set()
+    # processed_chains = set()
+    processed_chains = list()
 
     # Iterar pelas cadeias de quatro átomos
     for chain in chains_of_four:
         normalized_chain = tuple(sorted(chain, key=lambda x: int(x[1:])))
-        if normalized_chain in processed_chains:
+        angle = torsion_angles[chain]
+        if (normalized_chain, angle) in processed_chains:
             continue
+
+        processed_chains.append((normalized_chain, angle))
+
+    # Iterar pelas cadeias de quatro átomos
+    # for chain in chains_of_four:
+    #     normalized_chain = tuple(sorted(chain, key=lambda x: int(x[1:])))
+    #     if normalized_chain in processed_chains:
+    #         continue
+
+
+
         
-        processed_chains.add(normalized_chain)
+    #     processed_chains.add(normalized_chain)
 
 
         atom1, atom2, atom3, atom4 = chain
@@ -297,6 +310,9 @@ def calculate_dihedral_angle_gradient(file,atom_coords, bonds,atom_types, read_c
         gradients_dihedrals[f"d{dihedral_key_full}/d{atom2}"] = np.array([dphi_dx_atom2, dphi_dy_atom2, dphi_dz_atom2])
         gradients_dihedrals[f"d{dihedral_key_full}/d{atom3}"] = np.array([dphi_dx_atom3, dphi_dy_atom3, dphi_dz_atom3])
         gradients_dihedrals[f"d{dihedral_key_full}/d{atom4}"] = np.array([dphi_dx_atom4, dphi_dy_atom4, dphi_dz_atom4])
+
+    #print length processed chains
+    print(len(processed_chains))
 
     return gradients, gradients_dihedrals
 
