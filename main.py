@@ -1,10 +1,10 @@
-import util_lala as util
+import util as util
 
 
 if __name__ == "__main__":
     
-    util.debug('pinane', write_output=True)  # Replace 'ethane' with the name of your file
+    # util.debug('pinane', write_output=False)
 
-    # util.regular_run("methane", more_info=False)  # Replace 'ethane' with the name of your file
+    util.regular_run("ethane","ethane_opt.out", more_info=False) 
 
 

@@ -136,26 +136,14 @@ def calculate_B_and_G_matrices(file_name, read_coordinates_from_file=True, coord
 
     B_transpose = np.transpose(B)
     G = np.dot(B,B_transpose)
-    ############################ checar bem essa parte, entender o que fez, se deu sorted no eigenvalues, ou nao, etc####################   
-
+ 
+    #get the eigenvalues and eigenvectors of the G matrix
     eigenvalues, eigenvectors = np.linalg.eig(G)
-    eigenvalues_sorted = np.sort(eigenvalues)
-    eigenvectors_sorted = eigenvectors[:,eigenvalues.argsort()]
-
-    
 
     #remove imaginary part of the eigenvalues
-    eigenvalues_sorted = np.real(eigenvalues_sorted)
     eigenvalues = np.real(eigenvalues)
+    eigenvectors = np.real(eigenvectors)
 
-
-    #count number of eigenvalues that are close to zero
-    count = 0
-    for i in range(len(eigenvalues_sorted)):
-        if eigenvalues_sorted[i] < 1e-8:
-            count += 1
-    #check if this part makes sense
-    #if we are using this count for anything
 
 
     D = np.diag(eigenvalues)
@@ -166,8 +154,7 @@ def calculate_B_and_G_matrices(file_name, read_coordinates_from_file=True, coord
             D[i][i] = 1/D[i][i]
 
 
-    eigenvectors = np.real(eigenvectors)
-    eigenvectors_sorted = np.real(eigenvectors_sorted)
+
 
     V = eigenvectors
 
@@ -180,8 +167,6 @@ def calculate_B_and_G_matrices(file_name, read_coordinates_from_file=True, coord
     return B, G_inverse
 
 
-
-calculate_B_and_G_matrices("nbutane")
 
  
 
@@ -226,7 +211,5 @@ def cartesian_to_internal(file_name, read_coordinates_from_file=True, coordinate
 
 
 
-
-cartesian_to_internal("nbutane")
 
 

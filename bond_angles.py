@@ -189,4 +189,3 @@ def calculate_torsion_angle(atom_coords, bonds, atom_types, read_coordinates_fro
 
     return torsion_angles, chains_of_four
 
-# calculate_torsion_angle("ethane", read_coordinates_from_file=True, bonds=reading.read_input("ethane", dev=True)[4], atom_types=reading.read_input("ethane", dev=True)[5])
