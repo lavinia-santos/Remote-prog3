@@ -278,9 +278,9 @@ def optimize_bfgs_cartesian (file_name, output_file, write_output = True, more_i
                     #write on output file
                     if write_output:
                         with open(output_file, "a") as f:
-                            f.write("\n\n###################### Optimization completed ######################\n\n")
+                            f.write("\n\n###################### Cartesian Optimization completed ######################\n\n")
                             f.write(f"\nOptimized geometry for {file_name}:\n")
-                            f.write(f"Convergence reached on step: {k}\n")
+                            f.write(f"\nConvergence reached on step: {k}\n")
                             f.write(f"Energy: {E_k:.8f} kcal/mol\n")
                             f.write(f"GRMS: {rms}\n")
                             f.write(f"Coordinates:\n")

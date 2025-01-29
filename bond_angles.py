@@ -184,8 +184,8 @@ def calculate_torsion_angle(atom_coords, bonds, atom_types, read_coordinates_fro
         torsion_angles[chain] = angle_deg
 
     if not torsion_angles:
-        print("Nenhuma cadeia de quatro átomos conectados foi encontrada para calcular ângulos de torção.") #translate
-    # else:
+        print("No chain of four connected atoms was found to calculate torsion angles.")
+    
 
     return torsion_angles, chains_of_four
 

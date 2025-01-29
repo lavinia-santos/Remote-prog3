@@ -255,11 +255,6 @@ def optimize_bfgs_internal (file_name, output_file, write_output=False, more_inf
             else:
                 #calculate B and G inverse for the new structure
                 B, G_inverse = internal_coord.calculate_B_and_G_matrices(file_name,read_coordinates_from_file=False,coordinates=atom_coords_new_cartesian)
-                # print("Convergence reached on internal cartesian step:",steps_internal_to_cartesian)
-                # print("New cartesian coordinates:",atom_coords_new_cartesian)
-                # print("New internal coordinates:",atom_coords_new_internal)
-                # print("B matrix in the new strcture:\n",B)
-                # print("G inverse matrix in the new strcture:\n",G_inverse)
                 if more_info:
                     with open(output_file, "a") as output_file:
                         output_file.write(f"Convergence reached on internal cartesian step: {steps_internal_to_cartesian}\n")
@@ -408,11 +403,7 @@ def optimize_bfgs_internal (file_name, output_file, write_output=False, more_inf
                     with open(output_file, "a") as output_file:
                         output_file.write(f"\nStarting cartesian to internal iteration {steps_internal_to_cartesian} in step {k}\n")
                         output_file.write(f"Current set of internals q_(k+1)^(j):\n{atom_coords_new_internal}\n")
-                
-                # print("\n\nCartesian fitting iteration number:\n",steps_internal_to_cartesian)
-
-                #print current set of internals
-                # print("current set of internals q_(k+1)^(j):\n",atom_coords_new_internal)
+ 
 
                 s0 = atom_coords_desired_internal - atom_coords_new_internal
                 for i in range((num_bonds+num_angles),len(s0)+1):
@@ -469,13 +460,7 @@ def optimize_bfgs_internal (file_name, output_file, write_output=False, more_inf
                         output_file.write(f"New internal coordinates: {atom_coords_new_internal}\n")
                         output_file.write(f"B matrix in the new strcture:\n{B}\n")
                         output_file.write(f"G inverse matrix in the new strcture:\n{G_inverse}\n")
-                # print("Convergence reached on internal step:",steps_internal_to_cartesian)
-                # print("atom_coords_previous_cartesian:",atom_coords_previous_cartesian)  
-                # print("atom_coords_new_cartesian converged:",atom_coords_new_cartesian)
-                # print("atom_coords_new_internal:",atom_coords_new_internal)
-                # print("B matrix in the new strcture:\n",B)
-                # print("G inverse matrix in the new strcture:\n",G_inverse)
-                # print("atom_coords_previous_internal:",atom_coords_previous_internal)
+
                 sk = atom_coords_new_internal - atom_coords_previous_internal
                 for i in range((num_bonds+num_angles),len(sk)+1):
                     sk[i-1] = normalize_2pi(sk[i-1])
@@ -509,17 +494,15 @@ def optimize_bfgs_internal (file_name, output_file, write_output=False, more_inf
                         output_file.write(f"Mk_new: {Mk_new}\n")
                         output_file.write(f"Previous Energy: {E_k1}\n")
                         output_file.write(f"New Energy: {E_k}\n")
-                # print("E_old:",E_k1)
-                # print("E_new:",E_k)
                 delta_E = E_k - E_k1
                 grms = np.sqrt(np.dot(grad1_cartesian_values_flat,grad1_cartesian_values_flat)/len(grad1_cartesian_values_flat))
-                # print("grms:",grms)
-                # print("Mk_new:",Mk_new)
+
                 
                 if grms <= threshold:
                     with open(output_file, "a") as f:
-                        f.write(f"Convergence reached on step {k}.\n")
+                        f.write("\n\n###################### Internal Coordinates Optimization completed ######################\n\n")
                         f.write(f"Optimized geometry for {file_name}:\n")
+                        f.write(f"\nConvergence reached on step {k}.\n")
                         f.write(f"Energy: {E_k:.6f} kcal/mol\n")
                         f.write(f"GRMS: {grms:.6f}\n")
                         f.write(f"Internal Coordinates:\n")
@@ -527,11 +510,7 @@ def optimize_bfgs_internal (file_name, output_file, write_output=False, more_inf
                         f.write(f"\nCartesian Coordinates:\n")
                         for atom in atom_coords_new_cartesian.keys():
                             f.write(f"{atom_types[str(atom)]} {atom_coords_new_cartesian[atom][0]:.6f} {atom_coords_new_cartesian[atom][1]:.6f} {atom_coords_new_cartesian[atom][2]:.6f}\n")
-                    # print("Convergence reached on k:",k)
-                    # print("final energy:",E_k)
-                    # print("grms:",grms)
-                    # print("final coordinates cartesian:",atom_coords_new_cartesian)
-                    # print("final coordinates internal:",atom_coords_new_internal)
+          
                     atom_coords_previous_internal = atom_coords_new_internal.copy()
                     break
                 
